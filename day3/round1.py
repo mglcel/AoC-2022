@@ -4,7 +4,7 @@
 P = [{ chr(x):x-ord(A)+N for x in range(ord(A), ord(A) + 26) } for A,N in { 'a':1, 'A':27 }.items() ]
 P = P[0] | P[1]
 
-total = 0
+total, Occ = 0, dict()
 cumul = lambda N: lambda x: Occ.update( {x: Occ.get(x, N) + N} )
 
 file = open("input.txt", "r")
