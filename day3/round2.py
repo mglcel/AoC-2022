@@ -24,4 +24,5 @@ for line in file:
 
     group_nb, Occ = 0, dict() # reset
 
+file.close()
 print(total)

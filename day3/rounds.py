@@ -16,5 +16,6 @@ for line in file:
     total2 += P[next(iter( set(group[0]).intersection(group[1]).intersection(group[2]) ))]
     group = []
 
+file.close()
 print(f"total round 1: {total1}")
 print(f"total round 2: {total2}")

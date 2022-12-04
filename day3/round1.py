@@ -22,4 +22,5 @@ for line in file:
   # Add item type by priority
   total += P[next(iter(common.keys()))]
 
+file.close()
 print(total)
