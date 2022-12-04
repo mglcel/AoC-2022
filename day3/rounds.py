@@ -11,7 +11,7 @@ for line in file:
   l = len(line)
   total1 += P[next(iter( set(line[:l//2]) & set(line[l//2:].strip()) ))]
 
-  group.append(list(line.strip()))
+  group.append(line.strip())
   if len(group) == 3:
     total2 += P[next(iter( set(group[0]) & set(group[1]) & set(group[2]) ))]
     group = []
