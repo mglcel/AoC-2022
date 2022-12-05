@@ -38,6 +38,7 @@ sBuffer:                  .skip BUFFERSIZE     // buffer result
 szLineBuffer:             .skip LINESIZE       // max line size
 .align 4
 stReadFile:               .skip readfile_end   // structure storage
+stCranes:                 .skip 0x64*0x9       // 100 * 9 matrix (limit 100 cranes total)
 
 // code
 .text
@@ -78,7 +79,7 @@ _start:
         mov X0, X1                              // read one line
         bl readLineFile
 
-        cmp X0, #0
+        cmp X0, #-1
         beq end                                 // end loop if no line read
         blt error                               // error ?
 
@@ -105,6 +106,15 @@ end:
 
         cmp X0, #0
         blt error                               // error ?
+
+	// --------------------------------------------------------------------
+
+day5:
+
+
+	
+
+	// --------------------------------------------------------------------
 
         mov X0, #0                              // return code 0
         b 100f                                  // branch end
@@ -143,7 +153,7 @@ readLineFile:
     svc 0x80
     mov X1, X10                                 // restore X1
 
-    cmp X0, #0                                  // error read or end -> end loop
+    cmp X0, #-1                                 // error read or end -> end loop
     ble 100f
 
     mov X7, X0                                  // number of read characters (set buffersize)
