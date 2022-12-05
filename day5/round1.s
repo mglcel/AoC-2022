@@ -110,11 +110,6 @@ init_crates:
 
 	// --------------------------------------------------------------------
 
-2:
-
-	cmp X15, #1
-	beq 3f
-
         adrp X0, szLineBuffer@PAGE              // line
         add X0, X0, szLineBuffer@PAGEOFF
 
@@ -122,28 +117,30 @@ init_crates:
         add X1, X1, stCrates@PAGEOFF
 
 	mov X2, X4                              // line size
+2:
+	cmp X15, #1                             // skip on procedure parsing
+	beq 3f
 
 	bl fillCrates
 
-        cmp X0, #0
+        cmp X0, #0                              // switch to procedure parsing
+        beq 5f
+3:
+	cmp X15, #0                             // skip on crates parsing
         beq 4f
 
-3:
-
-	// proceed	
-
-dbg_creates:	
-
+	bl parseProcedure
+4:	
 	// --------------------------------------------------------------------
 
         adrp X1, stReadFile@PAGE                // X1 has been destroyed
         add X1, X1, stReadFile@PAGEOFF
 
-        b 1b                                    // and loop
+        b 1b                                    // and loop - file read
 
-4:
+5:
 	mov X15, #1                             // switch to procedure parsing
-        b 3b
+        b 4b
 
 end:
         adrp X1, stReadFile@PAGE
@@ -155,6 +152,8 @@ end:
 
         cmp X0, #0
         blt error                               // error ?
+
+        // getCode
 
         mov X0, #0                              // return code 0
         b 100f                                  // branch end
@@ -314,5 +313,18 @@ fillCrates:
     beq 100b
 
     b 1b
+
+// ----------------------------------------------------------------------------
+
+parseProcedure:
+    mov X3, LR
+    mov X4, X0                                   // line
+    mov X5, X1                                   // stacks
+    mov X6, X2                                   // line size
+    mov X7, #1                                   // line pointer
+ 
+1000:
+    mov LR, X3                                   // restore LR
+    br LR                                        // return
 
 
