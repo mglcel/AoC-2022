@@ -14,6 +14,8 @@
 .equ BUFFERSIZE,          100
 .equ LINESIZE,            100              // limitation: maxLine = 100
 .equ EOL,                 0x0A
+.equ CRATES_MAX,          100
+.equ CRATES_NB,           9
 
 // readfile struct
 .equ readfile_Fd,         0
@@ -38,7 +40,7 @@ sBuffer:                  .skip BUFFERSIZE     // buffer result
 szLineBuffer:             .skip LINESIZE       // max line size
 .align 4
 stReadFile:               .skip readfile_end   // structure storage
-stCranes:                 .skip 0x64*0x9       // 100 * 9 matrix (limit 100 cranes total)
+stCrates:                 .skip CRATES_MAX*CRATES_NB
 
 // code
 .text
@@ -56,6 +58,8 @@ _start:
         mov X16, #SYS_OPEN                      // open file
         svc 0x80
 
+	mov X15, #0                             // Crates algo state (0: read, 1: proceed)
+
         cmp X0, #0                              // error ?
         ble error
 
@@ -72,14 +76,27 @@ _start:
         str X0, [X1, #readfile_line]
         mov X0, #LINESIZE                       // line buffer size
         str X0, [X1, #readfile_linesize]
-        mov X0, #BUFFERSIZE// + 1                 // init read pointer
+        mov X0, #BUFFERSIZE                     // init read pointer
         str X0, [X1, #readfile_pointer]                       
+
+        adrp X3, stCrates@PAGE                  // init stacks to 0
+        add X3, X3, stCrates@PAGEOFF
+        mov X4, #0
+init_crates:
+	mov X0, #0
+	mov X6, #CRATES_MAX
+	mul X5, X4, X6
+	strb W0, [ X3, X5 ]
+	add X4, X4, #1
+	cmp X4, #CRATES_NB
+        bne init_crates
 
 1:                                              // begin read loop
         mov X0, X1                              // read one line
         bl readLineFile
 
-        cmp X0, #-1
+        mov X4, X0                              // line size
+        cmp X4, #-1				// TODO: return 0x0a and manage here
         beq end                                 // end loop if no line read
         blt error                               // error ?
 
@@ -90,6 +107,30 @@ _start:
         adrp X0, szCarriageReturn@PAGE          // display skipped line return
         add X0, X0, szCarriageReturn@PAGEOFF
         bl print
+
+	// --------------------------------------------------------------------
+
+2:
+	cmp X15, #1
+	beq 3f
+
+        adrp X0, szLineBuffer@PAGE              // line
+        add X0, X0, szLineBuffer@PAGEOFF
+
+	adrp X1, stCrates@PAGE                  // Crates
+        add X1, X1, stCrates@PAGEOFF
+
+	mov X2, X4                              // line size
+
+	bl fillCrates
+
+3:
+
+	// proceed	
+
+dbg_creates:	
+
+	// --------------------------------------------------------------------
 
         adrp X1, stReadFile@PAGE                // X1 has been destroyed
         add X1, X1, stReadFile@PAGEOFF
@@ -106,15 +147,6 @@ end:
 
         cmp X0, #0
         blt error                               // error ?
-
-	// --------------------------------------------------------------------
-
-day5:
-
-
-	
-
-	// --------------------------------------------------------------------
 
         mov X0, #0                              // return code 0
         b 100f                                  // branch end
@@ -200,7 +232,7 @@ readLineFile:
 // ----------------------------------------------------------------------------
 
 print:
-    mov X3, LR // push {X0,X1,X2,X7, LR}        // save registers 
+    mov X3, LR                                  // save registers 
     mov X2, #0                                  // init counter length
 
 1:
@@ -220,3 +252,53 @@ print:
 2:
     add X2, X2, #1
     b 1b
+
+// ----------------------------------------------------------------------------
+
+fillCrates:
+    mov X3, LR
+    mov X4, X0                                   // line
+    mov X5, X1                                   // stacks
+    mov X6, X2                                   // line size
+    mov X7, #1                                   // line pointer
+    mov X8, #0                                   // stacks pointer
+
+1:
+    cmp X7, X6
+    bge 100f                                     // skip if line terminated
+
+    ldrb W9, [X4, X7]                            // load crate from line
+    cmp X9, 0x20
+    beq 1000f                                    // loop if space
+
+    mov X12, #CRATES_MAX
+    mul X10, X8, X12                             // stack pointer from zero
+    ldrb W11, [X5, X10]                          // load stack count
+    add X11, X11, #1                             // increase stack count
+    sub X12, X12, X11                            // position of crate in stack (reverse)
+    add X12, X12, X10
+    strb W9, [X5, X12]                           // store crate in stack
+    strb W11, [X5, X10]                          // update stack count
+
+    b 1000f
+
+100:
+    // return X7 (from caller, if 0 then next phase)
+
+    mov LR, X3
+    br LR
+
+1000:
+    add X7, X7, 4				 // increase line pointer by 4 (next stack)
+    add X8, X8, #1                               // increase stack pointer
+
+    mov X11, #CRATES_NB				 // end if max crates reached
+    cmp X8, X11
+    beq 100b
+
+    b 1b
+
+
+
+
+
