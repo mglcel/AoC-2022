@@ -14,8 +14,8 @@
 .equ BUFFERSIZE,          100
 .equ LINESIZE,            100              // limitation: maxLine = 100
 .equ EOL,                 0x0A
-.equ CRATES_MAX,          100
-.equ CRATES_NB,           9
+.equ CRATES_MAX,          100              // limitation: max Crates/Stack = 100
+.equ STACKS_NB,           9                // limitation: max Stacks = 9
 
 // readfile struct
 .equ readfile_Fd,         0
@@ -40,7 +40,7 @@ sBuffer:                  .skip BUFFERSIZE     // buffer result
 szLineBuffer:             .skip LINESIZE       // max line size
 .align 4
 stReadFile:               .skip readfile_end   // structure storage
-stCrates:                 .skip CRATES_MAX*CRATES_NB
+stCrates:                 .skip CRATES_MAX*STACKS_NB
 
 // code
 .text
@@ -88,7 +88,7 @@ init_crates:
 	mul X5, X4, X6
 	strb W0, [ X3, X5 ]
 	add X4, X4, #1
-	cmp X4, #CRATES_NB
+	cmp X4, #STACKS_NB
         bne init_crates
 
 1:                                              // begin read loop
@@ -111,6 +111,7 @@ init_crates:
 	// --------------------------------------------------------------------
 
 2:
+
 	cmp X15, #1
 	beq 3f
 
@@ -124,6 +125,9 @@ init_crates:
 
 	bl fillCrates
 
+        cmp X0, #0
+        beq 4f
+
 3:
 
 	// proceed	
@@ -136,6 +140,10 @@ dbg_creates:
         add X1, X1, stReadFile@PAGEOFF
 
         b 1b                                    // and loop
+
+4:
+	mov X15, #1                             // switch to procedure parsing
+        b 3b
 
 end:
         adrp X1, stReadFile@PAGE
@@ -268,8 +276,12 @@ fillCrates:
     bge 100f                                     // skip if line terminated
 
     ldrb W9, [X4, X7]                            // load crate from line
+
     cmp X9, 0x20
     beq 1000f                                    // loop if space
+    
+    cmp X9, 0x31
+    beq 102f                                     // return 0 on crate '1'
 
     mov X12, #CRATES_MAX
     mul X10, X8, X12                             // stack pointer from zero
@@ -280,25 +292,27 @@ fillCrates:
     strb W9, [X5, X12]                           // store crate in stack
     strb W11, [X5, X10]                          // update stack count
 
-    b 1000f
+    b 1000f                                      // increment and loop
 
 100:
-    // return X7 (from caller, if 0 then next phase)
+    mov LR, X3                                   // restore LR
+    mov X0, #1                                   // return 1 if possible remaining crates
 
-    mov LR, X3
-    br LR
+101:
+    br LR                                        // return
+
+102:
+    mov X0, #0
+    b 101b
 
 1000:
     add X7, X7, 4				 // increase line pointer by 4 (next stack)
     add X8, X8, #1                               // increase stack pointer
 
-    mov X11, #CRATES_NB				 // end if max crates reached
+    mov X11, #STACKS_NB				 // end if max crates reached
     cmp X8, X11
     beq 100b
 
     b 1b
-
-
-
 
 
