@@ -16,7 +16,7 @@
 .equ EOL,                 0x0A
 .equ CRATES_MAX,          120              // limitation: max Crates/Stack
 .equ STACKS_NB,           9                // limitation: max Stacks = 9
-.equ STACK_SHIFT,         60               // limitation: reverse shift amount
+.equ STACK_SHIFT,         100               // limitation: reverse shift amount
 
 // readfile struct
 .equ readfile_Fd,         0
