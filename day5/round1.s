@@ -41,6 +41,7 @@ szLineBuffer:             .skip LINESIZE       // max line size
 .align 4
 stReadFile:               .skip readfile_end   // structure storage
 stCrates:                 .skip CRATES_MAX*STACKS_NB
+sCode:                    .skip STACKS_NB
 
 // code
 .text
@@ -98,7 +99,7 @@ init_crates:
         mov X4, X0                              // line size
         cmp X4, #-1				// TODO: return 0x0a and manage here
         beq end                                 // end loop if no line read
-        blt error                               // error ?
+        //blt error                               // error ?
 
         adrp X0, szLineBuffer@PAGE              // display line
         add X0, X0, szLineBuffer@PAGEOFF
@@ -129,7 +130,7 @@ init_crates:
 	cmp X15, #0                             // skip on crates parsing
         beq 4f
 
-	bl parseProcedure
+	bl applyProcedure
 4:	
 	// --------------------------------------------------------------------
 
@@ -143,6 +144,18 @@ init_crates:
         b 4b
 
 end:
+dbg_end:
+	adrp X0, stCrates@PAGE                  // Print Code
+        add X0, X0, stCrates@PAGEOFF
+        adrp X1, sCode@PAGE                     // init stacks to 0
+        add X1, X1, sCode@PAGEOFF
+        bl getCode
+        bl print
+
+        adrp X0, szCarriageReturn@PAGE          // display line return
+        add X0, X0, szCarriageReturn@PAGEOFF
+        bl print
+
         adrp X1, stReadFile@PAGE
         add X1, X1, stReadFile@PAGEOFF
 
@@ -153,12 +166,11 @@ end:
         cmp X0, #0
         blt error                               // error ?
 
-        // getCode
-
         mov X0, #0                              // return code 0
         b 100f                                  // branch end
 
 error:
+dbg_error:
 	// TODO: better manage error here
         mov X0, #1                              // return error code 1
 100:                                            // standard end of the program
@@ -192,7 +204,10 @@ readLineFile:
     svc 0x80
     mov X1, X10                                 // restore X1
 
-    cmp X0, #-1                                 // error read or end -> end loop
+    cmp X0, #0                                  // end of file
+    beq 101f
+
+    cmp X0, #-1                                 // error read
     ble 100f
 
     mov X7, X0                                  // number of read characters (set buffersize)
@@ -232,7 +247,12 @@ readLineFile:
     mov LR, X9                                  // restore registers
     br LR                                       // return
 
+101:
+    mov X0, #-1                                 // end of file
+    bl 100b
+
 1000:
+dbg_ferror:
     mov X0, #-2
     b 100b
 
@@ -316,15 +336,101 @@ fillCrates:
 
 // ----------------------------------------------------------------------------
 
-parseProcedure:
+applyProcedure:
     mov X3, LR
     mov X4, X0                                   // line
     mov X5, X1                                   // stacks
     mov X6, X2                                   // line size
-    mov X7, #1                                   // line pointer
+
+    cmp X6, #0                                   // skip empty line
+    beq 1000f
+
+    ldrb W8, [X4, #5]                            // nb crates
+    ldrb W9, [X4, #6]
+
+    sub X8, X8, 0x30                             // convert from ascii
+
+    mov X1, #5                                   // line pointer 
+
+    cmp X9, 0x20
+    beq 1f
  
+    mov X1, #6                                   // line pointer
+
+    sub X9, X9, 0x30
+    mov X2, #10
+    mul X10, X8, X2
+    add X8, X9, X10                              // X8 is nb crates
+
+1:
+    add X1, X1, #7
+    ldrb W9, [X4, X1]                            // X9 is source stack nb
+    sub X9, X9, 0x30
+    sub X9, X9, #1       // index
+    add X1, X1, #5
+    ldrb W10, [X4, X1]                           // X10 is dest stack nb
+    sub X10, X10, 0x30
+    sub X10, X10, #1     // index
+
+    mov X11, #CRATES_MAX
+    mul X12, X9, X11                             // X12 - source stack
+    ldrb W4, [X5, X12]                           // X4 - load source stack count
+    mul X13, X10, X11                            // X13 - dest stack
+    ldrb W6, [X5, X13]                           // X6 - load dest stack count
+
+    mov X7, 0                                    // Crate nb
+2: 
+    sub X2, X11, X4
+    add X2, X2, X12
+    add X2, X2, X7
+    ldrb W1, [X5, X2]                            // load top crate from source
+    sub X4, X4, #1
+    
+    sub X2, X11, X6
+    add X2, X2, X13
+    sub X2, X2, #1
+    strb W1, [X5, X2]                            // store to dest stack
+    add X6, X6, #1
+
+    add X7, X7, #1
+    cmp X7, X8
+    bne 2b                                       // loop if remains crates
+3:
+    strb W4, [X5, X12]                           // update stacks count
+    strb W6, [X5, X13]
+
 1000:
     mov LR, X3                                   // restore LR
     br LR                                        // return
 
+// ----------------------------------------------------------------------------
+
+getCode:
+    mov X3, LR
+    mov X4, X0                                   // stacks
+    mov X5, X1                                   // code 
+
+    mov X1, #0                                   // stacks counter
+
+1:
+    mov X2, #CRATES_MAX
+    mul X6, X1, X2                               // X6 - stack
+    ldrb W7, [X4, X6]                            // X7 is crates count
+    sub X8, X2, X7
+    add X8, X8, X6
+    ldrb W9, [X4, X8]                            // X9 is last crate
+
+    strb W9, [X5, X1]                            // store in code
+
+    add X1, X1, #1                               // iterate on CRATES_MAX
+    cmp X1, #CRATES_MAX
+    bne 1b
+
+1000:
+    mov X1, 0x0a                                // terminate string
+    strb W1, [X5, X1]
+
+    mov X0, X5
+    mov LR, X3                                   // restore LR
+    br LR                                        // return
 
