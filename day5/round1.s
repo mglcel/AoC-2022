@@ -14,8 +14,9 @@
 .equ BUFFERSIZE,          100
 .equ LINESIZE,            100              // limitation: maxLine = 100
 .equ EOL,                 0x0A
-.equ CRATES_MAX,          100              // limitation: max Crates/Stack = 100
+.equ CRATES_MAX,          120              // limitation: max Crates/Stack
 .equ STACKS_NB,           9                // limitation: max Stacks = 9
+.equ STACK_SHIFT,         60               // limitation: reverse shift amount
 
 // readfile struct
 .equ readfile_Fd,         0
@@ -59,7 +60,7 @@ _start:
         mov X16, #SYS_OPEN                      // open file
         svc 0x80
 
-	mov X15, #0                             // Crates algo state (0: read, 1: proceed)
+	mov X15, #0                             // Crates algo state (0: read, 1: shift, 2: proceed)
 
         cmp X0, #0                              // error ?
         ble error
@@ -118,20 +119,50 @@ init_crates:
         add X1, X1, stCrates@PAGEOFF
 
 	mov X2, X4                              // line size
-2:
-	cmp X15, #1                             // skip on procedure parsing
-	beq 3f
+
+step_fillCrates:
+	cmp X15, #0                             // skip on procedure parsing
+	bne step_shift
 
 	bl fillCrates
 
         cmp X0, #0                              // switch to procedure parsing
-        beq 5f
-3:
-	cmp X15, #0                             // skip on crates parsing
-        beq 4f
+        beq change_shift
+
+step_shift:
+	cmp X15, #1
+	bne step_apply
+
+dbg_shift:
+	adrp X0, stCrates@PAGE
+        add X0, X0, stCrates@PAGEOFF
+
+	mov X16, X4
+        bl recordShifts                         // record current counts as pointer shifts
+        mov X4, X16
+
+	mov X15, #2
+
+step_apply:
+	cmp X15, #2                             // skip on crates parsing
+        bne 2f
+
+        adrp X0, szLineBuffer@PAGE              // line
+        add X0, X0, szLineBuffer@PAGEOFF
+
+	adrp X1, stCrates@PAGE                  // Crates
+        add X1, X1, stCrates@PAGEOFF
+
+	mov X2, X4                              // line size
 
 	bl applyProcedure
-4:	
+
+        b 2f
+
+change_shift:
+	mov X15, #1
+
+2:	
 	// --------------------------------------------------------------------
 
         adrp X1, stReadFile@PAGE                // X1 has been destroyed
@@ -139,19 +170,8 @@ init_crates:
 
         b 1b                                    // and loop - file read
 
-5:
-	mov X15, #1                             // switch to procedure parsing
-        b 4b
-
 end:
 dbg_end:
-
-	adrp X0, stCrates@PAGE
-        add X0, X0, stCrates@PAGEOFF
-
-        bl recordShifts                         // record current counts as pointer shifts
-
-dbg_shifts:
 
 	adrp X0, stCrates@PAGE                  // Print Code
         add X0, X0, stCrates@PAGEOFF
@@ -311,6 +331,7 @@ fillCrates:
     beq 102f                                     // return 0 on crate '1'
 
     mov X12, #CRATES_MAX
+    sub X12, X12, #STACK_SHIFT
     mul X10, X8, X12                             // stack pointer from zero
     ldrb W11, [X5, X10]                          // load stack count
     add X11, X11, #1                             // increase stack count
@@ -354,7 +375,7 @@ recordShifts:
     mov X2, #CRATES_MAX
     mul X6, X1, X2                               // X6 - stack
     ldrb W7, [X4, X6]                            // X7 is crates count
-    add X6, X6, #1
+    add X6, X6, #4
     strb W7, [X4, X6]
 
     add X1, X1, #1                               // iterate on CRATES_MAX
@@ -408,8 +429,14 @@ applyProcedure:
     mul X13, X10, X11                            // X13 - dest stack
     ldrb W6, [X5, X13]                           // X6 - load dest stack count
 
+    add X16, X12, #4
+    ldrb W17, [X5, X16]                          // X17 - source shift
+    add X18, X13, #4
+    ldrb W19, [X5, X18]                          // X19 - dest shift
+
     mov X7, 0                                    // Crate nb
 2: 
+/*
     sub X2, X11, X4
     add X2, X2, X12
     ldrb W1, [X5, X2]                            // load top crate from source
@@ -420,6 +447,25 @@ applyProcedure:
     sub X2, X2, #1
     strb W1, [X5, X2]                            // store to dest stack
     add X6, X6, #1
+*/
+
+dbg_dbg:
+
+    sub X2, X11, #STACK_SHIFT
+    sub X2, X2, X17
+    add X2, X2, X4
+    sub X2, X2, #1
+    add X2, X2, X12
+    ldrb W1, [X5, X2]                            // load top crate from source
+    sub X4, X4, #1
+    
+    sub X2, X11, #STACK_SHIFT
+    sub X2, X2, X19
+    add X2, X2, X6
+    add X2, X2, X13
+    strb W1, [X5, X2]                            // store to dest stack
+    add X6, X6, #1
+
 dbg_D:
 
     add X7, X7, #1
@@ -446,19 +492,26 @@ getCode:
     mov X2, #CRATES_MAX
     mul X6, X1, X2                               // X6 - stack
     ldrb W7, [X4, X6]                            // X7 is crates count
-    sub X8, X2, X7
+    add X6, X6, #4
+    ldrb W10, [X4, X6]                           // X10 is stack shift
+    sub X6, X6, #4
+
+    sub X8, X2, #STACK_SHIFT
+    sub X8, X8, X10
+    add X8, X8, X7
+    sub X8, X8, #1
     add X8, X8, X6
     ldrb W9, [X4, X8]                            // X9 is last crate
 
     strb W9, [X5, X1]                            // store in code
 
     add X1, X1, #1                               // iterate on CRATES_MAX
-    cmp X1, #CRATES_MAX
+    cmp X1, #STACKS_NB
     bne 1b
 
 1000:
-    mov X1, 0x0a                                // terminate string
-    strb W1, [X5, X1]
+    mov X2, 0x0a                                // terminate string
+    strb W2, [X5, X1]
 
     mov X0, X5
     mov LR, X3                                   // restore LR
