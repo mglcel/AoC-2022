@@ -2,7 +2,7 @@
 .arch armv8-a
 
 // syscalls
-.equ SYS_EXIT,            1                // Linux syscalls
+.equ SYS_EXIT,            1                     // Linux syscalls
 .equ SYS_READ,            3
 .equ SYS_WRITE,           4
 .equ SYS_OPEN,            5
@@ -12,11 +12,11 @@
 .equ STDOUT,              1
 .equ O_RDONLY,            0x0000
 .equ BUFFERSIZE,          100
-.equ LINESIZE,            100              // limitation: maxLine = 100
+.equ LINESIZE,            100                   // limitation: maxLine = 100
 .equ EOL,                 0x0A
-.equ CRATES_MAX,          120              // limitation: max Crates/Stack
-.equ STACKS_NB,           9                // limitation: max Stacks = 9
-.equ STACK_SHIFT,         100               // limitation: reverse shift amount
+.equ CRATES_MAX,          120                   // limitation: max Crates/Stack
+.equ STACKS_NB,           9                     // limitation: max Stacks = 9
+.equ STACK_SHIFT,         100                   // limitation: reverse shift amount
 
 // readfile struct
 .equ readfile_Fd,         0
@@ -53,157 +53,151 @@ sCode:                    .skip STACKS_NB
 .align 4
 
 _start:
-        adrp X0, szFilename@PAGE                // filename
-        add X0, X0, szFilename@PAGEOFF
-        mov X1, #O_RDONLY                       // flags
-        mov X2, #0                              // mode
-        mov X16, #SYS_OPEN                      // open file
-        svc 0x80
+    adrp X0, szFilename@PAGE                    // filename
+    add X0, X0, szFilename@PAGEOFF
+    mov X1, #O_RDONLY                           // flags
+    mov X2, #0                                  // mode
+    mov X16, #SYS_OPEN                          // open file
+    svc 0x80
 
-	mov X15, #0                             // Crates algo state (0: read, 1: shift, 2: proceed)
+    mov X15, #0                                 // Crates algo state (0: read, 1: shift, 2: proceed)
 
-        cmp X0, #0                              // error ?
-        ble error
+    cmp X0, #0                                  // error ?
+    ble error
 
-        adrp X1, stReadFile@PAGE                // init structure readfile
-        add X1, X1, stReadFile@PAGEOFF
-        str X0, [X1, #readfile_Fd]              // save FD in structure
-        adrp X0, sBuffer@PAGE                   // buffer address
-        add X0, X0, sBuffer@PAGEOFF
-        str X0, [X1, #readfile_buffer]
-        mov X0, #BUFFERSIZE                     // buffer size
-        str X0, [X1, #readfile_buffersize]
-        adrp X0, szLineBuffer@PAGE              // line buffer address
-        add X0, X0, szLineBuffer@PAGEOFF
-        str X0, [X1, #readfile_line]
-        mov X0, #LINESIZE                       // line buffer size
-        str X0, [X1, #readfile_linesize]
-        mov X0, #BUFFERSIZE                     // init read pointer
-        str X0, [X1, #readfile_pointer]                       
+    adrp X1, stReadFile@PAGE                    // init structure readfile
+    add X1, X1, stReadFile@PAGEOFF
+    str X0, [X1, #readfile_Fd]                  // save FD in structure
+    adrp X0, sBuffer@PAGE                       // buffer address
+    add X0, X0, sBuffer@PAGEOFF
+    str X0, [X1, #readfile_buffer]
+    mov X0, #BUFFERSIZE                         // buffer size
+    str X0, [X1, #readfile_buffersize]
+    adrp X0, szLineBuffer@PAGE                  // line buffer address
+    add X0, X0, szLineBuffer@PAGEOFF
+    str X0, [X1, #readfile_line]
+    mov X0, #LINESIZE                           // line buffer size
+    str X0, [X1, #readfile_linesize]
+    mov X0, #BUFFERSIZE                         // init read pointer
+    str X0, [X1, #readfile_pointer]                       
 
-        adrp X3, stCrates@PAGE                  // init stacks to 0
-        add X3, X3, stCrates@PAGEOFF
-        mov X4, #0
+    adrp X3, stCrates@PAGE                      // init stacks to 0
+    add X3, X3, stCrates@PAGEOFF
+    mov X4, #0
 init_crates:
-	mov X0, #0
-	mov X6, #CRATES_MAX
-	mul X5, X4, X6
-	strb W0, [ X3, X5 ]
-	add X4, X4, #1
-	cmp X4, #STACKS_NB
-        bne init_crates
+    mov X0, #0
+    mov X6, #CRATES_MAX
+    mul X5, X4, X6
+    strb W0, [ X3, X5 ]
+    add X4, X4, #1
+    cmp X4, #STACKS_NB
+    bne init_crates
 
 1:                                              // begin read loop
-        mov X0, X1                              // read one line
-        bl readLineFile
+    mov X0, X1                                  // read one line
+    bl readLineFile
 
-        mov X4, X0                              // line size
-        cmp X4, #-1				// TODO: return 0x0a and manage here
-        beq end                                 // end loop if no line read
-        //blt error                               // error ?
+    mov X4, X0                                  // line size
+    cmp X4, #-1                                 // TODO: return 0x0a and manage here
+    beq end                                     // end loop if no line read
+    //blt error                                 // error ?
 
-        adrp X0, szLineBuffer@PAGE              // display line
-        add X0, X0, szLineBuffer@PAGEOFF
-        bl print
+    /*
+    adrp X0, szLineBuffer@PAGE                  // display line
+    add X0, X0, szLineBuffer@PAGEOFF
+    bl print
 
-        adrp X0, szCarriageReturn@PAGE          // display skipped line return
-        add X0, X0, szCarriageReturn@PAGEOFF
-        bl print
+    adrp X0, szCarriageReturn@PAGE              // display skipped line return
+    add X0, X0, szCarriageReturn@PAGEOFF
+    bl print
+    */
 
-	// --------------------------------------------------------------------
+    // --------------------------------------------------------------------
 
-        adrp X0, szLineBuffer@PAGE              // line
-        add X0, X0, szLineBuffer@PAGEOFF
+    adrp X0, szLineBuffer@PAGE                  // line
+    add X0, X0, szLineBuffer@PAGEOFF
 
-	adrp X1, stCrates@PAGE                  // Crates
-        add X1, X1, stCrates@PAGEOFF
+    adrp X1, stCrates@PAGE                      // Crates
+    add X1, X1, stCrates@PAGEOFF
 
-	mov X2, X4                              // line size
+    mov X2, X4                                  // line size
 
 step_fillCrates:
-	cmp X15, #0                             // skip on procedure parsing
-	bne step_shift
+    cmp X15, #0                                 // skip on procedure parsing
+    bne step_shift
 
-	bl fillCrates
+    bl fillCrates
 
-        cmp X0, #0                              // switch to procedure parsing
-        beq change_shift
+    cmp X0, #0                                  // switch to procedure parsing
+    beq change_shift
 
 step_shift:
-	cmp X15, #1
-	bne step_apply
+    cmp X15, #1
+    bne step_apply
 
-dbg_shift:
-	adrp X0, stCrates@PAGE
-        add X0, X0, stCrates@PAGEOFF
+    adrp X0, stCrates@PAGE
+    add X0, X0, stCrates@PAGEOFF
 
-	mov X16, X4
-        bl recordShifts                         // record current counts as pointer shifts
-        mov X4, X16
+    mov X16, X4
+    bl recordShifts                             // record current counts as pointer shifts
+    mov X4, X16
 
-	mov X15, #2
+    mov X15, #2
 
 step_apply:
-	cmp X15, #2                             // skip on crates parsing
-        bne 2f
+    cmp X15, #2                                 // skip on crates parsing
+    bne 2f
 
-        adrp X0, szLineBuffer@PAGE              // line
-        add X0, X0, szLineBuffer@PAGEOFF
+    adrp X0, szLineBuffer@PAGE                  // line
+    add X0, X0, szLineBuffer@PAGEOFF
 
-	adrp X1, stCrates@PAGE                  // Crates
-        add X1, X1, stCrates@PAGEOFF
+    adrp X1, stCrates@PAGE                      // Crates
+    add X1, X1, stCrates@PAGEOFF
 
-	mov X2, X4                              // line size
+    mov X2, X4                                  // line size
 
-	bl applyProcedure
+    bl applyProcedure
 
-        b 2f
+    b 2f
 
 change_shift:
-	mov X15, #1
+    mov X15, #1
 
-2:	
-	// --------------------------------------------------------------------
+2:        
+    // --------------------------------------------------------------------
 
-        adrp X1, stReadFile@PAGE                // X1 has been destroyed
-        add X1, X1, stReadFile@PAGEOFF
+    adrp X1, stReadFile@PAGE                    // X1 has been destroyed
+    add X1, X1, stReadFile@PAGEOFF
 
-        b 1b                                    // and loop - file read
+    b 1b                                        // and loop - file read
 
 end:
-dbg_end:
+    adrp X0, stCrates@PAGE                      // Print Code
+    add X0, X0, stCrates@PAGEOFF
+    adrp X1, sCode@PAGE                         // init stacks to 0
+    add X1, X1, sCode@PAGEOFF
+    bl getCode
+    bl print
 
-	adrp X0, stCrates@PAGE                  // Print Code
-        add X0, X0, stCrates@PAGEOFF
-        adrp X1, sCode@PAGE                     // init stacks to 0
-        add X1, X1, sCode@PAGEOFF
-        bl getCode
-        bl print
+    adrp X1, stReadFile@PAGE
+    add X1, X1, stReadFile@PAGEOFF
 
-        adrp X0, szCarriageReturn@PAGE          // display line return
-        add X0, X0, szCarriageReturn@PAGEOFF
-        bl print
+    ldr X0, [X1, #readfile_Fd]                  // load FD from structure
+    mov X16, #SYS_CLOSE                         // call system close file
+    svc 0x80 
 
-        adrp X1, stReadFile@PAGE
-        add X1, X1, stReadFile@PAGEOFF
+    cmp X0, #0
+    blt error                                   // error ?
 
-        ldr X0, [X1, #readfile_Fd]              // load FD from structure
-        mov X16, #SYS_CLOSE                     // call system close file
-        svc 0x80 
-
-        cmp X0, #0
-        blt error                               // error ?
-
-        mov X0, #0                              // return code 0
-        b 100f                                  // branch end
+    mov X0, #0                                  // return code 0
+    b 100f                                      // branch end
 
 error:
-dbg_error:
-	// TODO: better manage error here
-        mov X0, #1                              // return error code 1
+    // TODO: better manage error here
+    mov X0, #1                                  // return error code 1
 100:                                            // standard end of the program
-        mov X16, #SYS_EXIT                      // request to exit program
-        svc 0x80 
+    mov X16, #SYS_EXIT                          // request to exit program
+    svc 0x80 
 
 // ----------------------------------------------------------------------------
 
@@ -280,7 +274,6 @@ readLineFile:
     bl 100b
 
 1000:
-dbg_ferror:
     mov X0, #-2
     b 100b
 
@@ -354,10 +347,10 @@ fillCrates:
     b 101b
 
 1000:
-    add X7, X7, 4				 // increase line pointer by 4 (next stack)
+    add X7, X7, 4                                // increase line pointer by 4 (next stack)
     add X8, X8, #1                               // increase stack pointer
 
-    mov X11, #STACKS_NB				 // end if max crates reached
+    mov X11, #STACKS_NB                          // end if max crates reached
     cmp X8, X11
     beq 100b
 
@@ -369,7 +362,7 @@ recordShifts:
     mov X3, LR
     mov X4, X0                                   // stacks
 
-    mov X1, #0					 // stack nb
+    mov X1, #0                                   // stack nb
 
 1:
     mov X2, #CRATES_MAX
@@ -436,9 +429,6 @@ applyProcedure:
 
     mov X7, 0                                    // Crate nb
 2: 
-
-dbg_dbg:
-
     sub X2, X11, #STACK_SHIFT
     sub X2, X2, X17
     add X2, X2, X4
@@ -453,8 +443,6 @@ dbg_dbg:
     add X2, X2, X13
     strb W1, [X5, X2]                            // store to dest stack
     add X6, X6, #1
-
-dbg_D:
 
     add X7, X7, #1
     cmp X7, X8
@@ -498,7 +486,7 @@ getCode:
     bne 1b
 
 1000:
-    mov X2, 0x0a                                // terminate string
+    mov X2, 0x0a                                 // terminate string
     strb W2, [X5, X1]
 
     mov X0, X5
