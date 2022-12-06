@@ -331,9 +331,9 @@ fillCrates:
     beq 102f                                     // return 0 on crate '1'
 
     mov X12, #CRATES_MAX
-    sub X12, X12, #STACK_SHIFT
     mul X10, X8, X12                             // stack pointer from zero
     ldrb W11, [X5, X10]                          // load stack count
+    sub X12, X12, #STACK_SHIFT
     add X11, X11, #1                             // increase stack count
     sub X12, X12, X11                            // position of crate in stack (reverse)
     add X12, X12, X10
@@ -436,18 +436,6 @@ applyProcedure:
 
     mov X7, 0                                    // Crate nb
 2: 
-/*
-    sub X2, X11, X4
-    add X2, X2, X12
-    ldrb W1, [X5, X2]                            // load top crate from source
-    sub X4, X4, #1
-    
-    sub X2, X11, X6
-    add X2, X2, X13
-    sub X2, X2, #1
-    strb W1, [X5, X2]                            // store to dest stack
-    add X6, X6, #1
-*/
 
 dbg_dbg:
 
