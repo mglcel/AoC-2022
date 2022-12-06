@@ -145,6 +145,14 @@ init_crates:
 
 end:
 dbg_end:
+
+	adrp X0, stCrates@PAGE
+        add X0, X0, stCrates@PAGEOFF
+
+        bl recordShifts                         // record current counts as pointer shifts
+
+dbg_shifts:
+
 	adrp X0, stCrates@PAGE                  // Print Code
         add X0, X0, stCrates@PAGEOFF
         adrp X1, sCode@PAGE                     // init stacks to 0
@@ -333,6 +341,28 @@ fillCrates:
     beq 100b
 
     b 1b
+
+// ----------------------------------------------------------------------------
+
+recordShifts:
+    mov X3, LR
+    mov X4, X0                                   // stacks
+
+    mov X1, #0					 // stack nb
+
+1:
+    mov X2, #CRATES_MAX
+    mul X6, X1, X2                               // X6 - stack
+    ldrb W7, [X4, X6]                            // X7 is crates count
+    add X6, X6, #1
+    strb W7, [X4, X6]
+
+    add X1, X1, #1                               // iterate on CRATES_MAX
+    cmp X1, #CRATES_MAX
+    bne 1b
+ 
+    mov LR, X3                                   // restore LR
+    br LR
 
 // ----------------------------------------------------------------------------
 
