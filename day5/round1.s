@@ -382,10 +382,15 @@ applyProcedure:
 2: 
     sub X2, X11, X4
     add X2, X2, X12
-    add X2, X2, X7
+    sub X2, X2, X7
     ldrb W1, [X5, X2]                            // load top crate from source
     sub X4, X4, #1
     
+    cmp X1, #0
+    beq dbg_zero_1
+
+dbg_zero_2:
+
     sub X2, X11, X6
     add X2, X2, X13
     sub X2, X2, #1
@@ -402,6 +407,9 @@ applyProcedure:
 1000:
     mov LR, X3                                   // restore LR
     br LR                                        // return
+
+dbg_zero_1:
+    b dbg_zero_2
 
 // ----------------------------------------------------------------------------
 
