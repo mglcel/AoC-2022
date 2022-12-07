@@ -9,5 +9,4 @@ def compute(s)
   }
 end
 
-compute 4
-compute 14
+compute 4 ; compute 14
