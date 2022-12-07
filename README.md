@@ -1,4 +1,6 @@
 # AoC-2022
 
+Advent of Code 2022 solutions
 
-Avent of Code 2022 solutions
+--
+mglcel

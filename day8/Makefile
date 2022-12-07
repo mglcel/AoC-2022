@@ -1,4 +1,4 @@
 
-rounds.class: rounds.scala
-	scalac rounds.scala
+Rounds.class: Rounds.scala
+	scalac Rounds.scala
 
