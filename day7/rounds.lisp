@@ -34,7 +34,7 @@
     )
 )
 
-(defun total (&optional dir children) ;; Cumulate sizes on directories, skip files from tree
+(defun total (dir children) ;; Cumulate sizes on directories, skip files from tree
     (let ( (size 0) (nc (list)) )
         (map nil #'(lambda (e) 
                (if (integerp (first (last e)))
