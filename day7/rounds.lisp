@@ -1,9 +1,15 @@
 
 (ql:quickload :cl-ppcre)
 
-(defvar round1 0)
+(defvar sp_req 30000000)
+(defvar sp_max 70000000)
+(defvar sp_min 100000)
 
-(defun build (in root)
+(defvar round1 0)
+(defvar round2 (list))
+(defvar round2_tb3d 0)
+
+(defun build (in root) ;; Build a tree structure of the disk
 	(let ((struct ()) )
 		(do ((line (read-line in nil) (read-line in nil) ))
 			((or (null line) (string= line "$ cd ..")))
@@ -25,7 +31,7 @@
 	)
 )
 
-(defun total (&optional file children)
+(defun total (&optional dir children) ;; Cumulate sizes on directories, skip files from tree
 	(let ( (size 0) (nc (list)) )
 		(map nil #'(lambda (e) 
  	  		(if (integerp (first (last e)))
@@ -37,17 +43,28 @@
 			)
 		    ) children
     		)
-		(when (<= size 100000) (incf round1 size) )
-    		(list file nc size)
+		(when (<= size sp_min) (incf round1 size) )
+		(push (cons dir size) round2)
+    		(list dir nc size)
 	)
 )
 
 (with-open-file (in "input.txt")
 	(format T "~%")
 	(let ((struct (first(second(build in "."))))(dirs)) 
+	  	;; round 1
 		(setq dirs (total (first struct) (second struct)))
-		; (print dirs) ; debug print structure
                 (format T "round1 = ~a~%" round1)
+		
+		;; round 2
+		(setq round2_tb3d (- sp_req (- sp_max (first(last dirs)))))
+		(let ((selected nil))
+			(mapcar 
+			  (lambda (x) (when (and (>(cdr x) round2_tb3d) (not selected)) (setq selected (cdr x)) ) ) 
+			  (sort round2 (lambda (a b) (< (cdr a) (cdr b))))
+			)
+			(format T "round2 = ~a~%" selected)
+		)
 	)
 )
 
