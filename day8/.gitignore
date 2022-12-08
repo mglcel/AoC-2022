@@ -1,3 +1,4 @@
-Rounds$.class
-Rounds.class
-Rounds.tasty
+target/
+.idea/
+.bsp/
+project/
