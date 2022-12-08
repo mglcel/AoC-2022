@@ -44,12 +44,8 @@ object Rounds {
   }
 
   private def getScenicScore(forest: Forest, pos:Coordinates): Int = {
-    var scenicScore = 1
-    Range(0, 4).foreach { direction =>
-      scenicScore *= getTreeDistance(direction, forest,
-        doShift(direction, pos), forest.trees(pos._2)(pos._1).height)
-    }
-    scenicScore
+    Range(0, 4).map(direction => getTreeDistance(direction, forest,
+        doShift(direction, pos), forest.trees(pos._2)(pos._1).height)).product
   }
 
   def main(args: Array[String]): Unit = {
