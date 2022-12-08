@@ -9,7 +9,7 @@ object Rounds {
   private type Coordinates = (Int, Int)
 
   private case class Forest(var trees: TreeMatrix, maxX: Int, maxY: Int) {
-    def isWithin(pos: Coordinates) = (pos._1 > -1 && pos._1 <= maxX) && (pos._2 > -1 && pos._2 <= maxY)
+    def hasTreeAt(pos: Coordinates) = (pos._1 > -1 && pos._1 <= maxX) && (pos._2 > -1 && pos._2 <= maxY)
   }
 
   private case class Tree(var height:Int, var space:Array[Int]) {
@@ -21,7 +21,7 @@ object Rounds {
     (pos._1 + shift(direction)._1, pos._2 + shift(direction)._2)
 
   private def getMaxViewSize(direction : Int, forest : Forest, pos:Coordinates) : Int = {
-    if ( forest.isWithin(pos) ) {
+    if ( forest.hasTreeAt(pos) ) {
       val tree = forest.trees(pos._2)(pos._1)
       if (tree.space(direction) == -1) tree.space.update(direction,
           getMaxViewSize(direction, forest, doShift(direction, pos))
@@ -36,7 +36,7 @@ object Rounds {
   }
 
   private def getTreeDistance(direction : Int, forest : Forest, pos:Coordinates, height:Int = 0) : Int = {
-    if ( forest.isWithin(pos) ) {
+    if ( forest.hasTreeAt(pos) ) {
       if (forest.trees(pos._2)(pos._1).height < height) {
         1 + getTreeDistance(direction, forest, doShift(direction, pos), height)
       } else 1
