@@ -7,7 +7,7 @@ object Rounds {
 
   private type TreeMatrix = Array[Array[Tree]]
   private type Coordinates = (Int, Int)
-  
+
   private case class Forest(var trees: TreeMatrix, maxX: Int, maxY: Int) {
     def isWithin(pos: Coordinates) = (pos._1 > -1 && pos._1 <= maxX) && (pos._2 > -1 && pos._2 <= maxY)
   }
@@ -58,7 +58,7 @@ object Rounds {
     var treeMatrix = fromFile("input.txt").getLines.toArray
         .map(_.toArray.map(x => Tree(x.asDigit, Array.fill(4)(-1))))
 
-    var forest = Forest(
+    val forest = Forest(
       trees = treeMatrix,
       maxY = treeMatrix(0).length - 1,
       maxX = treeMatrix.length - 1)
