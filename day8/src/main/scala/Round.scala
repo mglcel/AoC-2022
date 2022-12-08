@@ -17,13 +17,13 @@ object Rounds {
   }
 
   private val shift: List[(Int, Int)] = List((-1, 0), (1, 0), (0, -1), (0, 1))
+  private def doShift(distance: Int, pos: Coordinates) = (pos._1 + shift(distance)._1, pos._2 + shift(distance)._2)
 
   private def getMaxViewSize(direction : Int, forest : Forest, pos:Coordinates) : Int = {
     if ( forest.isWithin(pos) ) {
       val tree = forest.trees(pos._2)(pos._1)
       if (tree.space(direction) == -1) tree.space.update(direction,
-          getMaxViewSize(direction, forest,
-            (pos._1 + shift(direction)._1, pos._2 + shift(direction)._2))
+          getMaxViewSize(direction, forest, doShift(direction, pos))
       )
       max(tree.space(direction), tree.height)
     } else -1
@@ -38,18 +38,16 @@ object Rounds {
     if ( forest.isWithin(pos) ) {
       val tree = forest.trees(pos._2)(pos._1)
       if (tree.height < height) {
-        1 + getTreeDistance(direction, forest,
-          (pos._1 + shift(direction)._1, pos._2 + shift(direction)._2), height)
+        1 + getTreeDistance(direction, forest, doShift(direction, pos), height)
       } else 1
     } else 0
   }
 
   private def getScenicScore(forest: Forest, pos:Coordinates): Int = {
     var scenicScore = 1
-    Range(0, 4).foreach { distance =>
-      scenicScore *= getTreeDistance(distance, forest,
-        (pos._1 + shift(distance)._1, pos._2 + shift(distance)._2),
-        forest.trees(pos._2)(pos._1).height)
+    Range(0, 4).foreach { direction =>
+      scenicScore *= getTreeDistance(direction, forest,
+        doShift(direction, pos), forest.trees(pos._2)(pos._1).height)
     }
     scenicScore
   }
