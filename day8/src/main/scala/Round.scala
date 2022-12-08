@@ -7,7 +7,9 @@ object Rounds {
 
   private type TreeMatrix = Array[Array[Tree]]
   private type Coordinates = (Int, Int)
-  private case class Forest(var trees: TreeMatrix, maxX: Int, maxY: Int)
+  private case class Forest(var trees: TreeMatrix, maxX: Int, maxY: Int) {
+    def isWithin(pos: Coordinates) = (pos._1 > -1 && pos._1 <= maxX) && (pos._2 > -1 && pos._2 <= maxY)
+  }
 
   private case class Tree(var height:Int, var space:Array[Int]) {
     def isVisible = space.exists(v => height > v)
@@ -16,12 +18,11 @@ object Rounds {
   private val shift: List[(Int, Int)] = List((-1, 0), (1, 0), (0, -1), (0, 1))
 
   private def getMaxViewSizeOrValue(direction : Int, forest : Forest, pos:Coordinates) : Int = {
-    val (x, y) = pos
-    if ( (x > -1 && x <= forest.maxX) && (y > -1 && y <= forest.maxY) ) {
-      val tree = forest.trees(y)(x)
+    if ( forest.isWithin(pos) ) {
+      val tree = forest.trees(pos._2)(pos._1)
       if (tree.space(direction) == -1) tree.space.update(direction,
           getMaxViewSizeOrValue(direction, forest,
-            (x + shift(direction)._1, y + shift(direction)._2))
+            (pos._1 + shift(direction)._1, pos._2 + shift(direction)._2))
       )
       max(tree.space(direction), tree.height)
     } else -1
@@ -33,12 +34,11 @@ object Rounds {
   }
 
   private def getTreeDistance(direction : Int, forest : Forest, pos:Coordinates, height:Int = 0) : Int = {
-    val (x, y) = pos
-    if ( (x > -1 && x <= forest.maxX) && (y > -1 && y <= forest.maxY) ) {
-      val tree = forest.trees(y)(x)
+    if ( forest.isWithin(pos) ) {
+      val tree = forest.trees(pos._2)(pos._1)
       if (tree.height < height) {
         1 + getTreeDistance(direction, forest,
-          (x + shift(direction)._1, y + shift(direction)._2), height)
+          (pos._1 + shift(direction)._1, pos._2 + shift(direction)._2), height)
       } else 1
     } else 0
   }
