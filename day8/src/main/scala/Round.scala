@@ -4,59 +4,73 @@ import scala.io.Source.fromFile
 import scala.math._
 
 object Rounds {
+
+  private type TreeMatrix = Array[Array[Tree]]
+  private type Coordinates = (Int, Int)
+  private case class Forest(var trees: TreeMatrix, maxX: Int, maxY: Int)
+
   private case class Tree(var height:Int, var space:Array[Int]) {
     def isVisible = space.exists(v => height > v)
   }
+
   private val shift: List[(Int, Int)] = List((-1, 0), (1, 0), (0, -1), (0, 1))
 
-  private def getMaxViewSizeOrValue(direction : Int, matrix : Array[Array[Tree]], x:Int = 0, y:Int = 0) : Int = {
-    val (maxY, maxX) = (matrix(0).length - 1, matrix.length - 1)
-    if ( (x > -1 && x <= maxX) && (y > -1 && y <= maxY) ) {
-      val tree = matrix(y)(x)
+  private def getMaxViewSizeOrValue(direction : Int, forest : Forest, pos:Coordinates) : Int = {
+    val (x, y) = pos
+    if ( (x > -1 && x <= forest.maxX) && (y > -1 && y <= forest.maxY) ) {
+      val tree = forest.trees(y)(x)
       if (tree.space(direction) == -1) tree.space.update(direction,
-          getMaxViewSizeOrValue(direction, matrix, x + shift(direction)._1, y + shift(direction)._2)
+          getMaxViewSizeOrValue(direction, forest,
+            (x + shift(direction)._1, y + shift(direction)._2))
       )
       max(tree.space(direction), tree.height)
     } else -1
   }
 
-  private def fillMaxViewSizes(matrix : Array[Array[Tree]], x:Int = 0, y:Int = 0) : Tree = {
-    Range(0, 4).foreach { getMaxViewSizeOrValue(_, matrix, x, y) }
-    matrix(y)(x)
+  private def fillMaxViewSizes(forest : Forest, pos:Coordinates) : Tree = {
+    Range(0, 4).foreach { getMaxViewSizeOrValue(_, forest, pos) }
+    forest.trees(pos._2)(pos._1)
   }
 
-  private def getTreeDistance(direction : Int, matrix : Array[Array[Tree]], x:Int = 0, y:Int = 0, height:Int = 0) : Int = {
-    val (maxY, maxX) = (matrix(0).length - 1, matrix.length - 1)
-    if ( (x > -1 && x <= maxX) && (y > -1 && y <= maxY) ) {
-      val tree = matrix(y)(x)
+  private def getTreeDistance(direction : Int, forest : Forest, pos:Coordinates, height:Int = 0) : Int = {
+    val (x, y) = pos
+    if ( (x > -1 && x <= forest.maxX) && (y > -1 && y <= forest.maxY) ) {
+      val tree = forest.trees(y)(x)
       if (tree.height < height) {
-        1 + getTreeDistance(direction, matrix, x + shift(direction)._1, y + shift(direction)._2, height)
+        1 + getTreeDistance(direction, forest,
+          (x + shift(direction)._1, y + shift(direction)._2), height)
       } else 1
     } else 0
   }
 
-  private def getScenicScore(matrix: Array[Array[Tree]], x: Int = 0, y: Int = 0): Int = {
+  private def getScenicScore(forest: Forest, pos:Coordinates): Int = {
     var scenicScore = 1
     Range(0, 4).foreach { distance =>
-      scenicScore *= getTreeDistance(distance, matrix, x + shift(distance)._1, y + shift(distance)._2, matrix(y)(x).height)
+      scenicScore *= getTreeDistance(distance, forest,
+        (pos._1 + shift(distance)._1, pos._2 + shift(distance)._2),
+        forest.trees(pos._2)(pos._1).height)
     }
     scenicScore
   }
 
   def main(args: Array[String]): Unit = {
-    var treeMatrix: Array[Array[Tree]] =
-      fromFile("input.txt").getLines.toArray
+    var treeMatrix = fromFile("input.txt").getLines.toArray
         .map(_.toArray.map(x => Tree(x.asDigit, Array.fill(4)(-1))))
 
+    var forest = Forest(
+      trees = treeMatrix,
+      maxY = treeMatrix(0).length - 1,
+      maxX = treeMatrix.length - 1)
+
     val visibleTrees: HashSet[Tree] = HashSet.empty
-    for(y <- treeMatrix.indices; x <- treeMatrix(y).indices) {
-      val tree = fillMaxViewSizes(treeMatrix, x, y)
+    for (y <- treeMatrix.indices; x <- treeMatrix(y).indices) {
+      val tree = fillMaxViewSizes(forest, (x, y))
       if (tree.isVisible) visibleTrees.add(tree)
     }
 
     val scenicScores: SortedSet[Int] = SortedSet.empty
-    for(y <- treeMatrix.indices; x <- treeMatrix(y).indices) {
-      scenicScores.add(getScenicScore(treeMatrix, x, y))
+    for (y <- treeMatrix.indices; x <- treeMatrix(y).indices) {
+      scenicScores.add(getScenicScore(forest, (x, y)))
     }
 
     println(s"Round 1 : ${visibleTrees.size}")
