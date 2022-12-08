@@ -18,11 +18,11 @@ object Rounds {
 
   private val shift: List[(Int, Int)] = List((-1, 0), (1, 0), (0, -1), (0, 1))
 
-  private def getMaxViewSizeOrValue(direction : Int, forest : Forest, pos:Coordinates) : Int = {
+  private def getMaxViewSize(direction : Int, forest : Forest, pos:Coordinates) : Int = {
     if ( forest.isWithin(pos) ) {
       val tree = forest.trees(pos._2)(pos._1)
       if (tree.space(direction) == -1) tree.space.update(direction,
-          getMaxViewSizeOrValue(direction, forest,
+          getMaxViewSize(direction, forest,
             (pos._1 + shift(direction)._1, pos._2 + shift(direction)._2))
       )
       max(tree.space(direction), tree.height)
@@ -30,7 +30,7 @@ object Rounds {
   }
 
   private def fillMaxViewSizes(forest : Forest, pos:Coordinates) : Tree = {
-    Range(0, 4).foreach { getMaxViewSizeOrValue(_, forest, pos) }
+    Range(0, 4).foreach { getMaxViewSize(_, forest, pos) }
     forest.trees(pos._2)(pos._1)
   }
 
