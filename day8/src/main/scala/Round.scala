@@ -24,7 +24,7 @@ object Rounds {
   private def getMaxViewSize(direction : Int, forest : Forest, pos:Coordinates) : Int = {
     if ( forest.hasTreeAt(pos) ) {
       val tree = forest.tree(pos)
-      if (forest.tree(pos).space(direction) == -1) tree.space.update(direction,
+      if (tree.space(direction) == -1) tree.space.update(direction,
           getMaxViewSize(direction, forest, doShift(direction, pos))
       )
       max(tree.space(direction), tree.height)
