@@ -37,8 +37,7 @@ object Rounds {
 
   private def getTreeDistance(direction : Int, forest : Forest, pos:Coordinates, height:Int = 0) : Int = {
     if ( forest.isWithin(pos) ) {
-      val tree = forest.trees(pos._2)(pos._1)
-      if (tree.height < height) {
+      if (forest.trees(pos._2)(pos._1).height < height) {
         1 + getTreeDistance(direction, forest, doShift(direction, pos), height)
       } else 1
     } else 0
