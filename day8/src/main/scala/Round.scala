@@ -17,9 +17,9 @@ object Rounds {
     def isVisible = space.exists(v => height > v)
   }
 
-  private val shift: List[(Int, Int)] = List((-1, 0), (1, 0), (0, -1), (0, 1))
+  private val shifts: List[(Int, Int)] = List((-1, 0), (1, 0), (0, -1), (0, 1))
   private def doShift(direction: Int, pos: Coordinates) =
-    (pos._1 + shift(direction)._1, pos._2 + shift(direction)._2)
+    (pos._1 + shifts(direction)._1, pos._2 + shifts(direction)._2)
 
   private def getMaxViewSize(direction : Int, forest : Forest, pos:Coordinates) : Int = {
     if ( forest.hasTreeAt(pos) ) {
