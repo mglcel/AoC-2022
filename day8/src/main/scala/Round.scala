@@ -7,6 +7,7 @@ object Rounds {
 
   private type TreeMatrix = Array[Array[Tree]]
   private type Coordinates = (Int, Int)
+  
   private case class Forest(var trees: TreeMatrix, maxX: Int, maxY: Int) {
     def isWithin(pos: Coordinates) = (pos._1 > -1 && pos._1 <= maxX) && (pos._2 > -1 && pos._2 <= maxY)
   }
