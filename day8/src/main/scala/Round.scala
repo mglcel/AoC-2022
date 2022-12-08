@@ -10,6 +10,7 @@ object Rounds {
 
   private case class Forest(var trees: TreeMatrix, maxX: Int, maxY: Int) {
     def hasTreeAt(pos: Coordinates) = (pos._1 > -1 && pos._1 <= maxX) && (pos._2 > -1 && pos._2 <= maxY)
+    def tree(pos: Coordinates) = trees(pos._2)(pos._1)
   }
 
   private case class Tree(var height:Int, var space:Array[Int]) {
@@ -22,8 +23,8 @@ object Rounds {
 
   private def getMaxViewSize(direction : Int, forest : Forest, pos:Coordinates) : Int = {
     if ( forest.hasTreeAt(pos) ) {
-      val tree = forest.trees(pos._2)(pos._1)
-      if (tree.space(direction) == -1) tree.space.update(direction,
+      val tree = forest.tree(pos)
+      if (forest.tree(pos).space(direction) == -1) tree.space.update(direction,
           getMaxViewSize(direction, forest, doShift(direction, pos))
       )
       max(tree.space(direction), tree.height)
@@ -32,12 +33,12 @@ object Rounds {
 
   private def fillMaxViewSizes(forest : Forest, pos:Coordinates) : Tree = {
     Range(0, 4).foreach { getMaxViewSize(_, forest, pos) }
-    forest.trees(pos._2)(pos._1)
+    forest.tree(pos)
   }
 
   private def getTreeDistance(direction : Int, forest : Forest, pos:Coordinates, height:Int = 0) : Int = {
     if ( forest.hasTreeAt(pos) ) {
-      if (forest.trees(pos._2)(pos._1).height < height) {
+      if (forest.tree(pos).height < height) {
         1 + getTreeDistance(direction, forest, doShift(direction, pos), height)
       } else 1
     } else 0
@@ -45,7 +46,7 @@ object Rounds {
 
   private def getScenicScore(forest: Forest, pos:Coordinates): Int = {
     Range(0, 4).map(direction => getTreeDistance(direction, forest,
-        doShift(direction, pos), forest.trees(pos._2)(pos._1).height)).product
+        doShift(direction, pos), forest.tree(pos).height)).product
   }
 
   def main(args: Array[String]): Unit = {
