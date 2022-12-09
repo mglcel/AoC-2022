@@ -36,10 +36,10 @@ fun main() {
     }
 
     fun moveRope(currentRope: Rope, direction: Int) : Rope {
-        val (head, nodes) = shiftToDirection(currentRope.first, direction) to currentRope.second
+        val head = shiftToDirection(currentRope.first, direction)
         val newNodes = mutableListOf<Node>()
         var first = head
-        nodes.forEach {
+        currentRope.second.forEach {
             newNodes.add(reconnectNodes(first, it).second)
             first = newNodes.last()
         }
