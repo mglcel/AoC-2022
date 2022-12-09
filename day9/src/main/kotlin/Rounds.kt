@@ -54,8 +54,7 @@ fun main() {
     fun getSeenPositionsByTail(nbNodes: Int, motions: List<Pair<String, String>>): Int {
         val rope = Pair(Pair(0, 0), List(nbNodes){Pair(0, 0)})
         val seenPositions = mutableSetOf<Node>()
-        recordTail(rope, seenPositions)
-        var nextRope = rope
+        var nextRope = recordTail(rope, seenPositions)
         motions.forEach { motion ->
             repeat(motion.second.toInt()) {
                 nextRope = recordTail(moveRope(nextRope, directionCodes[motion.first]!!), seenPositions)
