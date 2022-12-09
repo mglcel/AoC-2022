@@ -18,14 +18,14 @@ object Rounds {
   }
 
   private val shifts: List[(Int, Int)] = List((-1, 0), (1, 0), (0, -1), (0, 1))
-  private def doShift(pos: Coordinates)(implicit direction: Int) =
+  private def shift(pos: Coordinates)(implicit direction: Int) =
     (pos._1 + shifts(direction)._1, pos._2 + shifts(direction)._2)
 
   private def getMaxViewSize(pos:Coordinates)(implicit forest : Forest, direction : Int) : Int = {
     if ( forest.hasTreeAt(pos) ) {
       val tree = forest.tree(pos)
       if (tree.space(direction) == -1)
-        tree.space.update(direction, getMaxViewSize(doShift(pos)))
+        tree.space.update(direction, getMaxViewSize(shift(pos)))
       max(tree.space(direction), tree.height)
     } else -1
   }
@@ -38,14 +38,14 @@ object Rounds {
   private def getTreeDistance(pos:Coordinates, height:Int = 0)(implicit forest : Forest, direction : Int) : Int = {
     if ( forest.hasTreeAt(pos) )
       if (forest.tree(pos).height < height)
-        1 + getTreeDistance(doShift(pos), height)
+        1 + getTreeDistance(shift(pos), height)
       else 1
     else 0
   }
 
   private def getScenicScore(pos:Coordinates)(implicit forest : Forest): Int = {
     Range(0, 4).map(implicit direction =>
-      getTreeDistance(doShift(pos), forest.tree(pos).height)).product
+      getTreeDistance(shift(pos), forest.tree(pos).height)).product
   }
 
   def main(args: Array[String]): Unit = {
