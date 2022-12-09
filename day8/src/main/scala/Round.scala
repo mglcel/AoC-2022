@@ -8,8 +8,8 @@ object Rounds {
   private type TreeMatrix = Array[Array[Tree]]
   private type Coordinates = (Int, Int)
 
-  private case class Forest(var trees: TreeMatrix, maxX: Int, maxY: Int) {
-    def hasTreeAt(pos: Coordinates) = (pos._1 > -1 && pos._1 <= maxX) && (pos._2 > -1 && pos._2 <= maxY)
+  private case class Forest(var trees: TreeMatrix, max: (Int, Int)) {
+    def hasTreeAt(pos: Coordinates) = (pos._1 > -1 && pos._1 <= max._1) && (pos._2 > -1 && pos._2 <= max._2)
     def tree(pos: Coordinates) = trees(pos._2)(pos._1)
   }
 
@@ -18,55 +18,54 @@ object Rounds {
   }
 
   private val shifts: List[(Int, Int)] = List((-1, 0), (1, 0), (0, -1), (0, 1))
-  private def doShift(direction: Int, pos: Coordinates) =
+  private def doShift(pos: Coordinates)(implicit direction: Int) =
     (pos._1 + shifts(direction)._1, pos._2 + shifts(direction)._2)
 
-  private def getMaxViewSize(direction : Int, forest : Forest, pos:Coordinates) : Int = {
+  private def getMaxViewSize(pos:Coordinates)(implicit forest : Forest, direction : Int) : Int = {
     if ( forest.hasTreeAt(pos) ) {
       val tree = forest.tree(pos)
-      if (tree.space(direction) == -1) tree.space.update(direction,
-          getMaxViewSize(direction, forest, doShift(direction, pos))
-      )
+      if (tree.space(direction) == -1)
+        tree.space.update(direction, getMaxViewSize(doShift(pos)))
       max(tree.space(direction), tree.height)
     } else -1
   }
 
-  private def fillMaxViewSizes(forest : Forest, pos:Coordinates) : Tree = {
-    Range(0, 4).foreach { getMaxViewSize(_, forest, pos) }
+  private def fillMaxViewSizes(pos:Coordinates)(implicit forest : Forest) : Tree = {
+    Range(0, 4).foreach { implicit direction => getMaxViewSize(pos) }
     forest.tree(pos)
   }
 
-  private def getTreeDistance(direction : Int, forest : Forest, pos:Coordinates, height:Int = 0) : Int = {
-    if ( forest.hasTreeAt(pos) ) {
-      if (forest.tree(pos).height < height) {
-        1 + getTreeDistance(direction, forest, doShift(direction, pos), height)
-      } else 1
-    } else 0
+  private def getTreeDistance(pos:Coordinates, height:Int = 0)(implicit forest : Forest, direction : Int) : Int = {
+    if ( forest.hasTreeAt(pos) )
+      if (forest.tree(pos).height < height)
+        1 + getTreeDistance(doShift(pos), height)
+      else 1
+    else 0
   }
 
-  private def getScenicScore(forest: Forest, pos:Coordinates): Int = {
-    Range(0, 4).map(direction => getTreeDistance(direction, forest,
-        doShift(direction, pos), forest.tree(pos).height)).product
+  private def getScenicScore(pos:Coordinates)(implicit forest : Forest): Int = {
+    Range(0, 4).map(implicit direction =>
+      getTreeDistance(doShift(pos), forest.tree(pos).height)).product
   }
 
   def main(args: Array[String]): Unit = {
     var treeMatrix = fromFile("input.txt").getLines.toArray
-        .map(_.toArray.map(x => Tree(x.asDigit, Array.fill(4)(-1))))
+      .map(_.toArray.map(x => Tree(x.asDigit, Array.fill(4)(-1))))
 
-    val forest = Forest(
+    implicit val forest = Forest(
       trees = treeMatrix,
-      maxY = treeMatrix(0).length - 1,
-      maxX = treeMatrix.length - 1)
+      max = (treeMatrix(0).length - 1, treeMatrix.length - 1)
+    )
 
     val visibleTrees: HashSet[Tree] = HashSet.empty
     for (y <- treeMatrix.indices; x <- treeMatrix(y).indices) {
-      val tree = fillMaxViewSizes(forest, (x, y))
+      val tree = fillMaxViewSizes((x, y))
       if (tree.isVisible) visibleTrees.add(tree)
     }
 
     val scenicScores: SortedSet[Int] = SortedSet.empty
     for (y <- treeMatrix.indices; x <- treeMatrix(y).indices) {
-      scenicScores.add(getScenicScore(forest, (x, y)))
+      scenicScores.add(getScenicScore((x, y)))
     }
 
     println(s"Round 1 : ${visibleTrees.size}")
