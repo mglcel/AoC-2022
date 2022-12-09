@@ -17,6 +17,7 @@ object Rounds {
     def isVisible = space.exists(v => height > v)
   }
 
+  private val Directions = Range(0, 4)
   private val shifts: List[(Int, Int)] = List((-1, 0), (1, 0), (0, -1), (0, 1))
   private def shift(pos: Coordinates)(implicit direction: Int) =
     (pos._1 + shifts(direction)._1, pos._2 + shifts(direction)._2)
@@ -31,7 +32,7 @@ object Rounds {
   }
 
   private def fillMaxViewSizes(pos:Coordinates)(implicit forest : Forest) : Tree = {
-    Range(0, 4).foreach { implicit direction => getMaxViewSize(pos) }
+    Directions.foreach { implicit direction => getMaxViewSize(pos) }
     forest.tree(pos)
   }
 
@@ -44,7 +45,7 @@ object Rounds {
   }
 
   private def getScenicScore(pos:Coordinates)(implicit forest : Forest): Int =
-    Range(0, 4).map(implicit direction => getTreeDistance(shift(pos), forest.tree(pos).height)).product
+    Directions.map(implicit direction => getTreeDistance(shift(pos), forest.tree(pos).height)).product
 
   def main(args: Array[String]): Unit = {
     var treeMatrix = fromFile("input.txt").getLines.toArray
