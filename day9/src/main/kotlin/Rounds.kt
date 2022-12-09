@@ -7,6 +7,7 @@ import kotlin.text.format
 typealias Node = Pair<Int, Int>
 typealias Rope = Pair<Node, List<Node>>
 
+private val emptyRope = Pair(0, 0)
 private val directionCodes = hashMapOf("L" to 0, "R" to 1, "U" to 2, "D" to 3)
 private val shifts = listOf(Pair(-1, 0), Pair(1, 0), Pair(0, 1), Pair(0, -1))
 
@@ -52,7 +53,7 @@ fun main() {
     }
 
     fun getSeenPositionsByTail(nbNodes: Int, motions: List<Pair<String, String>>): Int {
-        val rope = Pair(Pair(0, 0), List(nbNodes){Pair(0, 0)})
+        val rope = Pair(emptyRope, List(nbNodes){emptyRope})
         val seenPositions = mutableSetOf<Node>()
         var nextRope = recordTail(rope, seenPositions)
         motions.forEach { motion ->
