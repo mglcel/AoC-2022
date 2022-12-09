@@ -64,9 +64,8 @@ object Rounds {
     }
 
     val scenicScores: SortedSet[Int] = SortedSet.empty
-    for (y <- treeMatrix.indices; x <- treeMatrix(y).indices) {
+    for (y <- treeMatrix.indices; x <- treeMatrix(y).indices)
       scenicScores.add(getScenicScore((x, y)))
-    }
 
     println(s"Round 1 : ${visibleTrees.size}")
     println(s"Round 2 : ${scenicScores.last}")
