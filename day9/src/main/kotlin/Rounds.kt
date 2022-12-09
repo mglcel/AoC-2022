@@ -30,7 +30,7 @@ fun main() {
 
     // ------------------------------------------------------------------------
 
-    fun moveNodes(first: Node, second: Node, direction: Int) : Pair<Node, Node> {
+    fun moveNode(first: Node, second: Node, direction: Int) : Pair<Node, Node> {
         return if (!isNear(first, second)) Pair(first, shiftToRef(second, first))
         else Pair(first, second)
     }
@@ -40,12 +40,12 @@ fun main() {
         val newNodes = mutableListOf<Node>()
         var first = head
         nodes.forEach {
-            newNodes.add(moveNodes(first, it, direction).second)
+            newNodes.add(moveNode(first, it, direction).second)
             first = newNodes.last()
         }
         return Pair(head, newNodes)
     }
-
+r
     fun recordTail(rope: Rope, seenPositions: MutableSet<Node>) : Rope {
         seenPositions.add(rope.second.last())
         return rope
