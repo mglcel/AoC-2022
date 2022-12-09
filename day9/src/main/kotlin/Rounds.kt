@@ -51,7 +51,8 @@ fun main() {
         return rope
     }
 
-    fun getSeenPositionsByTail(rope: Rope, lines: List<Pair<String, String>>): Int {
+    fun getSeenPositionsByTail(nbNodes: Int, lines: List<Pair<String, String>>): Int {
+        val rope = Pair(Pair(0, 0), List(nbNodes){Pair(0, 0)})
         val seenPositions = mutableSetOf<Node>()
         recordTail(rope, seenPositions)
         var nextRope = rope
@@ -68,9 +69,6 @@ fun main() {
     var lines = File("input.txt").bufferedReader().readLines().map {
             it.split(" ").zipWithNext().single() }
 
-    val ropeRound1 = Pair(Pair(0, 0), listOf(Pair(0, 0)))
-    println(String.format("Round 1: %d", getSeenPositionsByTail(ropeRound1, lines)))
-
-    val ropeRound2 = Pair(Pair(0, 0), List(9){Pair(0, 0)})
-    println(String.format("Round 2: %d", getSeenPositionsByTail(ropeRound2, lines)))
+    println(String.format("Round 1: %d", getSeenPositionsByTail(1, lines)))
+    println(String.format("Round 2: %d", getSeenPositionsByTail(9, lines)))
 }
