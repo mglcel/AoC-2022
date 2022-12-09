@@ -22,8 +22,7 @@ fun main() {
     }
 
     fun shiftToRef(node: Node, ref: Node): Node {
-        val decX = (ref.first - node.first)
-        val decY = (ref.second - node.second)
+        val (decX, decY) = (ref.first - node.first) to (ref.second - node.second)
         return Pair(
             node.first + if(abs(decX) == 2) decX / 2 else decX,
             node.second + if(abs(decY) == 2) decY / 2 else decY)
