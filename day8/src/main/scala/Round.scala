@@ -43,10 +43,8 @@ object Rounds {
     else 0
   }
 
-  private def getScenicScore(pos:Coordinates)(implicit forest : Forest): Int = {
-    Range(0, 4).map(implicit direction =>
-      getTreeDistance(shift(pos), forest.tree(pos).height)).product
-  }
+  private def getScenicScore(pos:Coordinates)(implicit forest : Forest): Int =
+    Range(0, 4).map(implicit direction => getTreeDistance(shift(pos), forest.tree(pos).height)).product
 
   def main(args: Array[String]): Unit = {
     var treeMatrix = fromFile("input.txt").getLines.toArray
