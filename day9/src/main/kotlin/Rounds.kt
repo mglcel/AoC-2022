@@ -45,7 +45,7 @@ fun main() {
         }
         return Pair(head, newNodes)
     }
-r
+
     fun recordTail(rope: Rope, seenPositions: MutableSet<Node>) : Rope {
         seenPositions.add(rope.second.last())
         return rope
