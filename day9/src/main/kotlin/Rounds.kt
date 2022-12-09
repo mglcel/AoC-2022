@@ -30,7 +30,7 @@ fun main() {
 
     // ------------------------------------------------------------------------
 
-    fun moveNode(first: Node, second: Node) : Pair<Node, Node> {
+    fun reconnectNodes(first: Node, second: Node) : Pair<Node, Node> {
         return if (!isNear(first, second)) Pair(first, shiftToRef(second, first))
         else Pair(first, second)
     }
@@ -40,7 +40,7 @@ fun main() {
         val newNodes = mutableListOf<Node>()
         var first = head
         nodes.forEach {
-            newNodes.add(moveNode(first, it).second)
+            newNodes.add(reconnectNodes(first, it).second)
             first = newNodes.last()
         }
         return Pair(head, newNodes)
