@@ -1,7 +1,81 @@
-fun main(args: Array<String>) {
-    println("Hello World!")
+import java.io.File
+import kotlin.math.abs
+import kotlin.math.pow
+import kotlin.math.sqrt
+import kotlin.text.format
 
-    // Try adding program arguments via Run/Debug configuration.
-    // Learn more about running applications: https://www.jetbrains.com/help/idea/running-applications.html.
-    println("Program arguments: ${args.joinToString()}")
+typealias Node = Pair<Int, Int>
+typealias Rope = Pair<Node, List<Node>>
+
+private val directionCodes = hashMapOf<String, Int>("L" to 0, "R" to 1, "U" to 2, "D" to 3)
+private val shifts = listOf<Pair<Int, Int>>(Pair(-1, 0), Pair(1, 0), Pair(0, 1), Pair(0, -1))
+
+fun main() {
+
+    fun isAligned(node1: Node, node2: Node): Boolean {
+        return (node1.first == node2.first) || (node1.second == node2.second)
+    }
+
+    fun isNear(node1: Node, node2: Node): Boolean {
+        return sqrt((node2.first - node1.first).toDouble().pow(2)
+                    + (node2.second - node1.second).toDouble().pow(2)) < 2
+    }
+
+    fun shiftToDirection(node: Node, direction: Int): Node {
+        return Pair(node.first + shifts[direction].first, node.second + shifts[direction].second)
+    }
+
+    fun shiftToRef(node: Node, ref: Node): Node {
+        val decX = (ref.first - node.first)
+        val decY = (ref.second - node.second)
+        return Pair(
+            node.first + if(abs(decX) == 2) decX / 2 else decX,
+            node.second + if(abs(decY) == 2) decY / 2 else decY)
+    }
+
+    // ------------------------------------------------------------------------
+
+    fun moveNodes(first: Node, second: Node, direction: Int) : Pair<Node, Node> {
+        return if (!isNear(first, second)) Pair(first, shiftToRef(second, first))
+        else Pair(first, second)
+    }
+
+    fun moveRope(currentRope: Rope, direction: Int) : Rope {
+        val (head, nodes) = shiftToDirection(currentRope.first, direction) to currentRope.second
+        val newNodes = mutableListOf<Node>()
+        var first = head
+        nodes.forEach {
+            newNodes.add(moveNodes(first, it, direction).second)
+            first = newNodes.last()
+        }
+        return Pair(head, newNodes)
+    }
+
+    fun recordTail(rope: Rope, seenPositions: MutableSet<Node>) : Rope {
+        seenPositions.add(rope.second.last())
+        return rope
+    }
+
+    fun getSeenPositionsByTail(rope: Rope, lines: List<Pair<String, String>>): Int {
+        val seenPositions = mutableSetOf<Node>()
+        recordTail(rope, seenPositions)
+        var nextRope = rope
+        lines.forEach {
+            1.rangeTo(it.second.toInt()).forEach { _ ->
+                nextRope = recordTail(moveRope(nextRope, directionCodes[it.first]!!), seenPositions)
+            }
+        }
+        return seenPositions.size
+    }
+
+    // ------------------------------------------------------------------------
+
+    var lines = File("input.txt").bufferedReader().readLines().map {
+            it.split(" ").zipWithNext().single() }
+
+    val ropeRound1 = Pair(Pair(0, 0), listOf(Pair(0, 0)))
+    println(String.format("Round 1: %d", getSeenPositionsByTail(ropeRound1, lines)))
+
+    val ropeRound2 = Pair(Pair(0, 0), List(9){Pair(0, 0)})
+    println(String.format("Round 2: %d", getSeenPositionsByTail(ropeRound2, lines)))
 }
