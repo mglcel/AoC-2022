@@ -7,14 +7,10 @@ import kotlin.text.format
 typealias Node = Pair<Int, Int>
 typealias Rope = Pair<Node, List<Node>>
 
-private val directionCodes = hashMapOf<String, Int>("L" to 0, "R" to 1, "U" to 2, "D" to 3)
-private val shifts = listOf<Pair<Int, Int>>(Pair(-1, 0), Pair(1, 0), Pair(0, 1), Pair(0, -1))
+private val directionCodes = hashMapOf("L" to 0, "R" to 1, "U" to 2, "D" to 3)
+private val shifts = listOf(Pair(-1, 0), Pair(1, 0), Pair(0, 1), Pair(0, -1))
 
 fun main() {
-
-    fun isAligned(node1: Node, node2: Node): Boolean {
-        return (node1.first == node2.first) || (node1.second == node2.second)
-    }
 
     fun isNear(node1: Node, node2: Node): Boolean {
         return sqrt((node2.first - node1.first).toDouble().pow(2)
