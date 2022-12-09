@@ -51,12 +51,12 @@ fun main() {
         return rope
     }
 
-    fun getSeenPositionsByTail(nbNodes: Int, commands: List<Pair<String, String>>): Int {
+    fun getSeenPositionsByTail(nbNodes: Int, motions: List<Pair<String, String>>): Int {
         val rope = Pair(Pair(0, 0), List(nbNodes){Pair(0, 0)})
         val seenPositions = mutableSetOf<Node>()
         recordTail(rope, seenPositions)
         var nextRope = rope
-        commands.forEach {
+        motions.forEach {
             1.rangeTo(it.second.toInt()).forEach { _ ->
                 nextRope = recordTail(moveRope(nextRope, directionCodes[it.first]!!), seenPositions)
             }
@@ -66,9 +66,9 @@ fun main() {
 
     // ------------------------------------------------------------------------
 
-    var commands = File("input.txt").bufferedReader().readLines().map {
+    var motions = File("input.txt").bufferedReader().readLines().map {
             it.split(" ").zipWithNext().single() }
 
-    println(String.format("Round 1: %d", getSeenPositionsByTail(1, commands)))
-    println(String.format("Round 2: %d", getSeenPositionsByTail(9, commands)))
+    println(String.format("Round 1: %d", getSeenPositionsByTail(1, motions)))
+    println(String.format("Round 2: %d", getSeenPositionsByTail(9, motions)))
 }
