@@ -56,9 +56,9 @@ fun main() {
         val seenPositions = mutableSetOf<Node>()
         recordTail(rope, seenPositions)
         var nextRope = rope
-        motions.forEach {
-            1.rangeTo(it.second.toInt()).forEach { _ ->
-                nextRope = recordTail(moveRope(nextRope, directionCodes[it.first]!!), seenPositions)
+        motions.forEach { motion ->
+            repeat(motion.second.toInt()) {
+                nextRope = recordTail(moveRope(nextRope, directionCodes[motion.first]!!), seenPositions)
             }
         }
         return seenPositions.size
