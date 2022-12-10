@@ -17,7 +17,7 @@ FROM (
 	FROM file
 ) t 
 CROSS JOIN (SELECT @cycle := 0) c 
-CROSS JOIN (select @value := 1) v
+CROSS JOIN (SELECT @value := 1) v
 ;
 
 SELECT s_20 + s_60 + s_100 + s_140 + s_180 + s_220 as round_1 FROM (
@@ -63,4 +63,4 @@ END |
 DELIMITER ;
 CALL crt();
 
-SELECT GROUP_CONCAT(pixel) FROM pixels GROUP BY line;
+SELECT GROUP_CONCAT(pixel) AS round_2 FROM pixels GROUP BY line;
