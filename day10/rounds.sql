@@ -36,7 +36,7 @@ CREATE PROCEDURE crt()
 BEGIN 
 	DECLARE c_max INT; 
 	DECLARE c_index INT UNSIGNED DEFAULT 0; 
-        DECLARE l_index INT UNSIGNED DEFAULT 1;
+	DECLARE l_index INT UNSIGNED DEFAULT 1;
 
 	SELECT max(cycle) INTO c_max FROM log; 
 	WHILE c_index <= c_max DO 
