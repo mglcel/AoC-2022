@@ -8,6 +8,7 @@ typealias Node = Pair<Int, Int>
 typealias Rope = Pair<Node, List<Node>>
 
 private val originNode = Pair(0, 0)
+private val originRope =
 private val directionCodes = hashMapOf("L" to 0, "R" to 1, "U" to 2, "D" to 3)
 private val shifts = listOf(Pair(-1, 0), Pair(1, 0), Pair(0, 1), Pair(0, -1))
 
