@@ -39,6 +39,7 @@ int** readgraph(char* filename) {
     			nodes = malloc(MAX_LINES * nb_cols * sizeof(char));
     			p_nodes = nodes;
     		}
+
     		strncpy(p_nodes, line, nb_cols);
     		p_nodes += nb_cols;
     	} while ((read = getline(&line, &len, fp)) != -1);
@@ -64,8 +65,8 @@ int** readgraph(char* filename) {
     	else if (current == 'E')
     		dest = i, nodes[i] = current = 'z';
 
-    	if (current == 'a') 
-		all_a[i_a++] = i;
+    	if (current == 'a')
+		    all_a[i_a++] = i;
     }
 
     /* fill-in graph */
