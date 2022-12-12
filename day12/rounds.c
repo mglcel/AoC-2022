@@ -141,6 +141,7 @@ int main()
     	dist = dijkstra(graph, node, nb_nodes);
     	if (dist[dest] < min)
     		min = dist[dest];
+	free(dist);
     }
     printf("Round 2: %d\n", min);
 
@@ -148,7 +149,6 @@ int main()
     for (int i = 0; i < nb_nodes; i++)
     	free(graph[i]);
     free(graph);
-    free(dist);
     free(all_a);
 
     return 0;
