@@ -55,8 +55,7 @@ int** readgraph(char* filename) {
         graph[i] = malloc(nb_nodes * sizeof(int)), all_a[i] = -1;
 
     /* identify start and dest, replace by the real values, identify 'a's */
-    unsigned int i_a = 0;
-    for (int i = 0; i < nb_nodes; i++) {
+    for (unsigned int i_a = 0, i = 0; i < nb_nodes; i++) {
         char current = nodes[i];
 
         if (current == 'S')
