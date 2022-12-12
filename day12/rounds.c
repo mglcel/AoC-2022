@@ -64,8 +64,7 @@ int** readgraph(char* filename) {
     	else if (current == 'E')
     		dest = i, nodes[i] = current = 'z';
 
-    	if (current == 'a')
-    		all_a[i_a++] = i;
+    	if (current == 'a') all_a[i_a++] = i;
     }
 
     /* fill-in graph */
