@@ -75,9 +75,9 @@ int** readgraph(char* filename) {
     	char next_char = nodes[i] + 1;
 
 	for (int n = -1; n < 2; n += 2) {
-    		if ((col + n >= 0) && (nodes[i + n] <= next_char))
+    		if ((col + n >= 0 && col + n < nb_cols) && (nodes[i + n] <= next_char))
     			graph[i][i + n] = 1;
-    		if ((row + n >= 0) && (nodes[i + n * nb_cols] <= next_char))
+    		if ((row + n >= 0 && row + n < nb_rows) && (nodes[i + n * nb_cols] <= next_char))
     			graph[i][i + n * nb_cols] = 1;
 	}
     }
