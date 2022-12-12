@@ -32,7 +32,7 @@ int** readgraph(char* filename) {
     if (read != -1) {
         do {
             if (nb_rows++ >= MAX_LINES)
-                exit(-1); // too many lines, increase MAX_LINES
+                exit(-2); // too many lines, increase MAX_LINES
 
             if (nb_cols == 0) { // assume the field is regular
                 nb_cols = read - 1;
