@@ -59,11 +59,10 @@ int** readgraph(char* filename) {
     for (int i = 0; i < nb_nodes; i++) {
     	char current = nodes[i];
 
-    	if (current == 'S') {
-    		current = 'a';
-    		src = i, nodes[i] = 'a';
-    	} else if (current == 'E')
-    		dest = i, nodes[i] = 'z';
+    	if (current == 'S')
+    		src = i, nodes[i] = current = 'a';
+    	else if (current == 'E')
+    		dest = i, nodes[i] = current = 'z';
 
     	if (current == 'a')
     		all_a[i_a++] = i;
