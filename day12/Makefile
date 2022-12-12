@@ -1,12 +1,12 @@
 PROJECT_ROOT = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
-OBJS = day12.o
+OBJS = rounds.o
 
 CFLAGS += -O2
 
-all:	day12
+all:	rounds
 
-day12:	$(OBJS)
+rounds:	$(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $^
 	$(EXTRA_CMDS)
 
@@ -17,4 +17,4 @@ day12:	$(OBJS)
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) -o $@ $<
 
 clean:
-	rm -fr day12 $(OBJS) $(EXTRA_CLEAN)
+	rm -fr rounds $(OBJS) $(EXTRA_CLEAN)
