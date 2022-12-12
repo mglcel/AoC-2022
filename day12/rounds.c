@@ -57,14 +57,13 @@ int** readgraph(char* filename) {
     /* identify start and dest, replace by the real values, identify 'a's */
     unsigned int i_a = 0;
     for (int i = 0; i < nb_nodes; i++) {
-    	int col = i % nb_cols, row = i / nb_cols;
-    	char current = nodes[row * nb_cols + col];
+    	char current = nodes[i];
 
     	if (current == 'S') {
     		current = 'a';
-    		src = i, nodes[row * nb_cols + col] = 'a';
+    		src = i, nodes[i] = 'a';
     	} else if (current == 'E')
-    		dest = i, nodes[row * nb_cols + col] = 'z';
+    		dest = i, nodes[i] = 'z';
 
     	if (current == 'a')
     		all_a[i_a++] = i;
@@ -73,7 +72,7 @@ int** readgraph(char* filename) {
     /* fill-in graph */
     for (int i = 0; i < nb_nodes; i++) {
     	int col = i % nb_cols, row = i / nb_cols;
-    	char current = nodes[row * nb_cols + col], next_char = current + 1;
+    	char current = nodes[i], next_char = current + 1;
 
     	if ((col - 1 >= 0) && (nodes[row * nb_cols + col - 1] <= next_char))
     		graph[i][i-1] = 1;
