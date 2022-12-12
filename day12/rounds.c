@@ -74,13 +74,13 @@ int** readgraph(char* filename) {
     	int col = i % nb_cols, row = i / nb_cols;
     	char current = nodes[i], next_char = current + 1;
 
-    	if ((col - 1 >= 0) && (nodes[row * nb_cols + col - 1] <= next_char))
+    	if ((col - 1 >= 0) && (nodes[i - 1] <= next_char))
     		graph[i][i-1] = 1;
-    	if ((col + 1 < nb_cols) && (nodes[row * nb_cols + col + 1] <= next_char))
+    	if ((col + 1 < nb_cols) && (nodes[i + 1] <= next_char))
     		graph[i][i+1] = 1;
-    	if ((row - 1 >= 0) && (nodes[(row - 1) * nb_cols + col] <= next_char))
+    	if ((row - 1 >= 0) && (nodes[i - nb_cols] <= next_char))
     		graph[i][i-nb_cols] = 1;
-    	if ((row + 1 < nb_rows) && (nodes[(row + 1) * nb_cols + col] <= next_char))
+    	if ((row + 1 < nb_rows) && (nodes[i + nb_cols] <= next_char))
     		graph[i][i+nb_cols] = 1;
     }
 
