@@ -2,11 +2,9 @@ use std::collections::VecDeque;
 use itertools::Itertools;
 use std::fs;
 
-type Op = Box<(dyn Fn(u64) -> u64 + 'static)>;
-
 struct Monkey {
     items: VecDeque<u64>,
-    apply: Option<Op>,
+    apply: Option<Box<(dyn Fn(u64) -> u64 + 'static)>>,
     test: Option<Box<(dyn Fn(u64) -> bool + 'static)>>,
     throw_on_true: usize,
     throw_on_false: usize,
@@ -32,7 +30,6 @@ fn sum_op(v: u64) -> Box<dyn Fn(u64) -> u64> { Box::new(move |x: u64| (x + v.clo
 fn divide_op(v: u64) -> Box<dyn Fn(u64) -> u64> { Box::new(move |x: u64| (x / v.clone())) }
 
 fn mod_op(v: u64) -> Box<dyn Fn(u64) -> u64> { Box::new(move |x: u64| (x % v.clone())) }
-
 fn is_divisible(v: u64) -> Box<dyn Fn(u64) -> bool> { Box::new(move |x: u64| (x % v.clone() == 0)) }
 
 fn new_op(op: String, value: String) -> Option<Box<dyn Fn(u64) -> u64>> {
@@ -86,7 +83,6 @@ fn main()-> std::io::Result<()> {
     let round = 2; // Set round to 1 or 2 : TODO: pass as arg
 
     let mut monkeys : Vec<Monkey> = vec![];
-
     let file = fs::read_to_string("input.txt").unwrap();
 
     let mut c_monkey = Monkey::default();
@@ -96,7 +92,8 @@ fn main()-> std::io::Result<()> {
         match i_line % 7 {
             1 => c_monkey.items = VecDeque::from_iter(
                 line.get(18..).unwrap().split(", ")
-                    .map(|s| s.parse::<u64>().unwrap()).collect::<Vec<u64>>()),
+                    .map(|s| s.parse::<u64>().unwrap()).collect::<Vec<u64>>()
+            ),
             2 => {
                 let mut params = line.get(23..).unwrap().split(" ");
                 c_monkey.apply = new_op(params.next().unwrap().to_string(),
