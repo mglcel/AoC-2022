@@ -154,6 +154,7 @@ int main()
     	free(graph[i]);
     free(graph);
     free(dist);
+    free(all_a);
 
     return 0;
 }
