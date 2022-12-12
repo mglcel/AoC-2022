@@ -20,7 +20,7 @@ int** readgraph(char* filename) {
     fp = fopen(filename, "r");
     if (fp == NULL) {
     	printf("Error reading file !\n");
-    	return NULL;
+    	exit(-1);
     }
 
     char *nodes;
@@ -64,7 +64,8 @@ int** readgraph(char* filename) {
     	else if (current == 'E')
     		dest = i, nodes[i] = current = 'z';
 
-    	if (current == 'a') all_a[i_a++] = i;
+    	if (current == 'a') 
+		all_a[i_a++] = i;
     }
 
     /* fill-in graph */
@@ -138,9 +139,8 @@ int main()
     int i_a = 0, min = INT_MAX;
     while ((node = all_a[i_a++]) != -1) {
     	dist = dijkstra(graph, node, nb_nodes);
-    	if (dist[dest] < min) {
+    	if (dist[dest] < min)
     		min = dist[dest];
-    	}
     }
     printf("Round 2: %d\n", min);
 
