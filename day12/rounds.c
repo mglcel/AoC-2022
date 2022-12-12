@@ -50,7 +50,7 @@ int** readgraph(char* filename) {
 
     /* allocate graph and 'a' vector */
     int **graph = malloc(nb_nodes * sizeof(int *));
-    all_a = malloc(nb_nodes * sizeof(size_t));
+    all_a = malloc(nb_nodes * sizeof(int));
     for (int i = 0 ; i < nb_nodes; i++)
     	graph[i] = malloc(nb_nodes * sizeof(int)), all_a[i] = -1;
 
