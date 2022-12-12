@@ -9,6 +9,8 @@
 size_t nb_cols = 0, nb_rows = 0, nb_nodes = 0, src = 0, dest = 0;
 unsigned int *all_a;
 
+/* ------------------------------------------------------------------------- */
+
 int** readgraph(char* filename) {
     FILE * fp;
     char * line = NULL;
@@ -24,6 +26,7 @@ int** readgraph(char* filename) {
     char *nodes;
     char *p_nodes;
 
+    /* fill nodes as an array of chars */
     nb_rows = nb_cols = 0;
     read = getline(&line, &len, fp);
     if (read != -1) {
@@ -52,7 +55,7 @@ int** readgraph(char* filename) {
     for (int i = 0 ; i < nb_nodes; i++)
     	graph[i] = malloc(nb_nodes * sizeof(int)), all_a[i] = -1;
 
-    /* identify start and dest, replace by real values, identify 'a's */
+    /* identify start and dest, replace by the real values, identify 'a's */
     unsigned int i_a = 0;
     for (int i = 0; i < nb_nodes; i++) {
     	int col = i % nb_cols, row = i / nb_cols;
@@ -73,15 +76,21 @@ int** readgraph(char* filename) {
     	int col = i % nb_cols, row = i / nb_cols;
     	char current = nodes[row * nb_cols + col], next_char = current + 1;
 
-    	if ((col - 1 >= 0) && (nodes[row * nb_cols + col - 1] <= next_char))	graph[i][i-1] = 1;
-    	if ((col + 1 < nb_cols) && (nodes[row * nb_cols + col + 1] <= next_char)) graph[i][i+1] = 1;
-    	if ((row - 1 >= 0) && (nodes[(row - 1) * nb_cols + col] <= next_char)) graph[i][i-nb_cols] = 1;
-    	if ((row + 1 < nb_rows) && (nodes[(row + 1) * nb_cols + col] <= next_char)) graph[i][i+nb_cols] = 1;
+    	if ((col - 1 >= 0) && (nodes[row * nb_cols + col - 1] <= next_char))
+    		graph[i][i-1] = 1;
+    	if ((col + 1 < nb_cols) && (nodes[row * nb_cols + col + 1] <= next_char))
+    		graph[i][i+1] = 1;
+    	if ((row - 1 >= 0) && (nodes[(row - 1) * nb_cols + col] <= next_char))
+    		graph[i][i-nb_cols] = 1;
+    	if ((row + 1 < nb_rows) && (nodes[(row + 1) * nb_cols + col] <= next_char))
+    		graph[i][i+nb_cols] = 1;
     }
 
     free(nodes);
     return graph;
 }
+
+/* ------------------------------------------------------------------------- */
 
 int minDistance(int dist[], bool * sptSet, int nb_nodes)
 {
@@ -118,7 +127,8 @@ int *dijkstra(int **graph, int src, int nb_nodes)
     return dist;
 }
 
-// driver's code
+/* ------------------------------------------------------------------------- */
+
 int main()
 {
 	int** graph = readgraph("input.txt");
@@ -139,6 +149,11 @@ int main()
     }
     printf("Round 2: %d\n", min);
 
+    /* free remaining memory */
+    for (int i = 0; i < nb_nodes; i++)
+    	free(graph[i]);
+    free(graph);
     free(dist);
+
     return 0;
 }
