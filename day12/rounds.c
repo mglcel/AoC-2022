@@ -31,7 +31,7 @@ int** readgraph(char* filename) {
     read = getline(&line, &len, fp);
     if (read != -1) {
     	do {
-    		if (nb_rows >= MAX_LINES)
+    		if (nb_rows++ >= MAX_LINES)
     			exit(-1); // too many lines, increase MAX_LINES
 
     		if (nb_cols == 0) { // assume the field is regular
@@ -41,7 +41,6 @@ int** readgraph(char* filename) {
     		}
     		strncpy(p_nodes, line, nb_cols);
     		p_nodes += nb_cols;
-    		nb_rows++;
     	} while ((read = getline(&line, &len, fp)) != -1);
     }
     fclose(fp);
