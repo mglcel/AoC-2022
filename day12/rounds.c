@@ -131,11 +131,11 @@ int main()
 {
 	int** graph = readgraph("input.txt");
 
-    // Round 1
+    /* Round 1 */
     int *dist = dijkstra(graph, src, nb_nodes);
     printf("Round 1: %d\n", dist[dest]);
 
-    // Round 2
+    /* Round 2 */
     unsigned int node = 0;
     int i_a = 0, min = INT_MAX;
     while ((node = all_a[i_a++]) != -1) {
