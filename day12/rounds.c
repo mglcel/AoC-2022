@@ -133,8 +133,7 @@ int main()
     free(dist);
 
     /* Round 2 */
-    unsigned int node = 0;
-    int i_a = 0, min = INT_MAX;
+    unsigned int node = 0, i_a = 0, min = INT_MAX;
     while ((node = all_a[i_a++]) != -1) {
         dist = dijkstra(graph, node, nb_nodes);
         if (dist[dest] < min)
