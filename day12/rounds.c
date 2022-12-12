@@ -132,6 +132,7 @@ int main()
     /* Round 1 */
     int *dist = dijkstra(graph, src, nb_nodes);
     printf("Round 1: %d\n", dist[dest]);
+    free(dist);
 
     /* Round 2 */
     unsigned int node = 0;
