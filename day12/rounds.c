@@ -19,8 +19,8 @@ int** readgraph(char* filename) {
 
     fp = fopen(filename, "r");
     if (fp == NULL) {
-    	printf("Error reading file !\n");
-    	exit(-1);
+        printf("Error reading file !\n");
+        exit(-1);
     }
 
     char *nodes;
@@ -30,18 +30,18 @@ int** readgraph(char* filename) {
     nb_rows = nb_cols = 0;
     read = getline(&line, &len, fp);
     if (read != -1) {
-    	do {
-    		if (nb_rows++ >= MAX_LINES)
-    			exit(-1); // too many lines, increase MAX_LINES
+        do {
+            if (nb_rows++ >= MAX_LINES)
+                exit(-1); // too many lines, increase MAX_LINES
 
-    		if (nb_cols == 0) { // assume the field is regular
-    			nb_cols = read - 1;
-    			p_nodes = nodes = malloc(MAX_LINES * nb_cols * sizeof(char));
-    		}
+            if (nb_cols == 0) { // assume the field is regular
+                nb_cols = read - 1;
+                p_nodes = nodes = malloc(MAX_LINES * nb_cols * sizeof(char));
+            }
 
-    		strncpy(p_nodes, line, nb_cols);
-    		p_nodes += nb_cols;
-    	} while ((read = getline(&line, &len, fp)) != -1);
+            strncpy(p_nodes, line, nb_cols);
+            p_nodes += nb_cols;
+        } while ((read = getline(&line, &len, fp)) != -1);
     }
     fclose(fp);
     if (line) free(line);
@@ -52,33 +52,33 @@ int** readgraph(char* filename) {
     int **graph = malloc(nb_nodes * sizeof(int *));
     all_a = malloc(nb_nodes * sizeof(int));
     for (int i = 0 ; i < nb_nodes; i++)
-    	graph[i] = malloc(nb_nodes * sizeof(int)), all_a[i] = -1;
+        graph[i] = malloc(nb_nodes * sizeof(int)), all_a[i] = -1;
 
     /* identify start and dest, replace by the real values, identify 'a's */
     unsigned int i_a = 0;
     for (int i = 0; i < nb_nodes; i++) {
-    	char current = nodes[i];
+        char current = nodes[i];
 
-    	if (current == 'S')
-    		src = i, nodes[i] = current = 'a';
-    	else if (current == 'E')
-    		dest = i, nodes[i] = current = 'z';
+        if (current == 'S')
+            src = i, nodes[i] = current = 'a';
+        else if (current == 'E')
+            dest = i, nodes[i] = current = 'z';
 
-    	if (current == 'a')
-		    all_a[i_a++] = i;
+        if (current == 'a')
+            all_a[i_a++] = i;
     }
 
     /* fill-in graph */
     for (int i = 0; i < nb_nodes; i++) {
-    	int col = i % nb_cols, row = i / nb_cols;
-    	char next_char = nodes[i] + 1;
+        int col = i % nb_cols, row = i / nb_cols;
+        char next_char = nodes[i] + 1;
 
-	for (int n = -1; n < 2; n += 2) {
-    		if ((col + n >= 0 && col + n < nb_cols) && (nodes[i + n] <= next_char))
-    			graph[i][i + n] = 1;
-    		if ((row + n >= 0 && row + n < nb_rows) && (nodes[i + n * nb_cols] <= next_char))
-    			graph[i][i + n * nb_cols] = 1;
-	}
+        for (int n = -1; n < 2; n += 2) {
+            if ((col + n >= 0 && col + n < nb_cols) && (nodes[i + n] <= next_char))
+                graph[i][i + n] = 1;
+            if ((row + n >= 0 && row + n < nb_rows) && (nodes[i + n * nb_cols] <= next_char))
+                graph[i][i + n * nb_cols] = 1;
+        }
     }
 
     free(nodes);
@@ -126,7 +126,7 @@ int *dijkstra(int **graph, int src, int nb_nodes)
 
 int main()
 {
-	int** graph = readgraph("input.txt");
+    int** graph = readgraph("input.txt");
 
     /* Round 1 */
     int *dist = dijkstra(graph, src, nb_nodes);
@@ -137,16 +137,16 @@ int main()
     unsigned int node = 0;
     int i_a = 0, min = INT_MAX;
     while ((node = all_a[i_a++]) != -1) {
-    	dist = dijkstra(graph, node, nb_nodes);
-    	if (dist[dest] < min)
-    		min = dist[dest];
-	free(dist);
+        dist = dijkstra(graph, node, nb_nodes);
+        if (dist[dest] < min)
+            min = dist[dest];
+        free(dist);
     }
     printf("Round 2: %d\n", min);
 
     /* free remaining memory */
     for (int i = 0; i < nb_nodes; i++)
-    	free(graph[i]);
+        free(graph[i]);
     free(graph);
     free(all_a);
 
