@@ -19,18 +19,18 @@ impl Default for Monkey {
 
 // ----------------------------------------------------------------------------
 
-fn self_multiply_op() -> Box<dyn Fn(u64) -> u64> { Box::new(move |x: u64| (x * x)) }
-fn self_sub_op() -> Box<dyn Fn(u64) -> u64> { Box::new(move |x: u64| (x - x)) }
-fn self_sum_op() -> Box<dyn Fn(u64) -> u64> { Box::new(move |x: u64| (x + x)) }
-fn self_divide_op() -> Box<dyn Fn(u64) -> u64> { Box::new(move |x: u64| (x / x)) }
+fn self_multiply_op() -> Box<dyn Fn(u64) -> u64> { Box::new(move |x: u64|       (x * x)) }
+fn self_sub_op() -> Box<dyn Fn(u64) -> u64> { Box::new(move |x: u64|            (x - x)) }
+fn self_sum_op() -> Box<dyn Fn(u64) -> u64> { Box::new(move |x: u64|            (x + x)) }
+fn self_divide_op() -> Box<dyn Fn(u64) -> u64> { Box::new(move |x: u64|         (x / x)) }
 
-fn multiply_op(v: u64) -> Box<dyn Fn(u64) -> u64> { Box::new(move |x: u64| (x * v.clone())) }
-fn sub_op(v: u64) -> Box<dyn Fn(u64) -> u64> { Box::new(move |x: u64| (x - v.clone())) }
-fn sum_op(v: u64) -> Box<dyn Fn(u64) -> u64> { Box::new(move |x: u64| (x + v.clone())) }
-fn divide_op(v: u64) -> Box<dyn Fn(u64) -> u64> { Box::new(move |x: u64| (x / v.clone())) }
+fn multiply_op(v: u64) -> Box<dyn Fn(u64) -> u64> { Box::new(move |x: u64|      (x * v.clone())) }
+fn sub_op(v: u64) -> Box<dyn Fn(u64) -> u64> { Box::new(move |x: u64|           (x - v.clone())) }
+fn sum_op(v: u64) -> Box<dyn Fn(u64) -> u64> { Box::new(move |x: u64|           (x + v.clone())) }
+fn divide_op(v: u64) -> Box<dyn Fn(u64) -> u64> { Box::new(move |x: u64|        (x / v.clone())) }
 
-fn mod_op(v: u64) -> Box<dyn Fn(u64) -> u64> { Box::new(move |x: u64| (x % v.clone())) }
-fn is_divisible(v: u64) -> Box<dyn Fn(u64) -> bool> { Box::new(move |x: u64| (x % v.clone() == 0)) }
+fn mod_op(v: u64) -> Box<dyn Fn(u64) -> u64> { Box::new(move |x: u64|           (x % v.clone())) }
+fn is_divisible(v: u64) -> Box<dyn Fn(u64) -> bool> { Box::new(move |x: u64|    (x % v.clone() == 0)) }
 
 fn new_op(op: String, value: String) -> Option<Box<dyn Fn(u64) -> u64>> {
     if value == "old" {
