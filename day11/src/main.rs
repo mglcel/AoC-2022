@@ -79,7 +79,7 @@ fn monkey_business_level(monkeys: &mut Vec<Monkey>) -> u64 {
         .product::<u64>()
 }
 
-fn main()-> std::io::Result<()> {
+fn main() {
     let round = 2; // Set round to 1 or 2 : TODO: pass as arg
 
     let mut monkeys : Vec<Monkey> = vec![];
@@ -122,6 +122,4 @@ fn main()-> std::io::Result<()> {
         look_at_monkeys(&mut monkeys, mod_op(div_product), 10_000);
         { println!("Round 2 : {:?}", monkey_business_level(&mut monkeys)); }
     }
-
-    Ok(())
 }
