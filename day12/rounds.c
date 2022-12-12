@@ -36,8 +36,7 @@ int** readgraph(char* filename) {
 
     		if (nb_cols == 0) { // assume the field is regular
     			nb_cols = read - 1;
-    			nodes = malloc(MAX_LINES * nb_cols * sizeof(char));
-    			p_nodes = nodes;
+    			p_nodes = nodes = malloc(MAX_LINES * nb_cols * sizeof(char));
     		}
 
     		strncpy(p_nodes, line, nb_cols);
