@@ -72,7 +72,7 @@ int** readgraph(char* filename) {
     /* fill-in graph */
     for (int i = 0; i < nb_nodes; i++) {
     	int col = i % nb_cols, row = i / nb_cols;
-    	char current = nodes[i], next_char = current + 1;
+    	char next_char = nodes[i] + 1;
 
     	if ((col - 1 >= 0) && (nodes[i - 1] <= next_char))
     		graph[i][i-1] = 1;
