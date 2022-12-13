@@ -8,11 +8,11 @@ const comparePackets = (left, right) => {
             for (var test, i = 0; i < left.length; i++)
                 if ((test = comparePackets(left[i], right[i])) != 0)
                     return test;
-            return left.length - right.length;
+            return Math.sign(left.length - right.length);
         } else return comparePackets(left, [right]);
     } else if (right.constructor == Array)
         return comparePackets([left], right);
-    return left - right;
+    return Math.sign(left - right);
 }
 
 const inputLines = new nReadlines('input.txt');
