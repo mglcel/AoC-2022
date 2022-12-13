@@ -48,7 +48,7 @@ int** readgraph(char* filename) {
     /* allocate graph and 'a' vector */
     int **graph = malloc(nb_nodes * sizeof(int *));
     all_a = malloc(nb_nodes * sizeof(int));
-    for (int i = 0 ; i < nb_nodes; i++)
+    for (int i = 0 ; i < nb_nodes; i++) // TODO: initialize to INT_MAX ?
         graph[i] = malloc(nb_nodes * sizeof(int)), all_a[i] = -1;
 
     /* identify start and dest, replace by the real values, identify 'a's */
@@ -130,13 +130,20 @@ int main()
     free(dist);
 
     /* Round 2 */
+    for (int i = 0; i < nb_nodes; i++) { /* Invert graph */
+    	for (int j = i + 1; j < nb_nodes; j++) {
+    		int tmp = graph[i][j];
+    		graph[i][j] = graph[j][i];
+    		graph[j][i] = tmp;
+    	}
+    }
+    dist = dijkstra(graph, dest, nb_nodes); /* Search from dest */
     unsigned int node = 0, i_a = 0, min = INT_MAX;
     while ((node = all_a[i_a++]) != -1) {
-        dist = dijkstra(graph, node, nb_nodes);
-        if (dist[dest] < min)
-            min = dist[dest];
-        free(dist);
+        if (dist[node] < min)
+            min = dist[node];
     }
+    free(dist);
     printf("Round 2: %d\n", min);
 
     /* free remaining memory */
