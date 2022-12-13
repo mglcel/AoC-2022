@@ -17,7 +17,7 @@ const comparePackets = (left, right) => {
 
 const inputLines = new nReadlines('input.txt');
 
-var index = 1, round1 = 0, packets = [];
+var index = 1, round1 = 0, packets = [], left, right;
 while ((left = inputLines.next()) && (right = inputLines.next()) && (index++)) {
     left = JSON.parse(left), right = JSON.parse(right);
     if (comparePackets(left, right) < 0)
