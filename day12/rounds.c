@@ -28,21 +28,18 @@ int** readgraph(char* filename) {
 
     /* fill nodes as an array of chars */
     nb_rows = nb_cols = 0;
-    read = getline(&line, &len, fp);
-    if (read != -1) {
-        do {
-            if (nb_rows++ >= MAX_LINES)
-                exit(-2); // too many lines, increase MAX_LINES
+    while ((read = getline(&line, &len, fp)) != -1) {
+        if (nb_rows++ >= MAX_LINES)
+            exit(-2); // too many lines, increase MAX_LINES
 
-            if (nb_cols == 0) { // assume the field is regular
-                nb_cols = read - 1;
-                p_nodes = nodes = malloc(MAX_LINES * nb_cols * sizeof(char));
-            }
+        if (nb_cols == 0) { // assume the field is regular
+            nb_cols = read - 1;
+            p_nodes = nodes = malloc(MAX_LINES * nb_cols * sizeof(char));
+        }
 
-            strncpy(p_nodes, line, nb_cols);
-            p_nodes += nb_cols;
-        } while ((read = getline(&line, &len, fp)) != -1);
-    }
+        strncpy(p_nodes, line, nb_cols);
+        p_nodes += nb_cols;
+     }
     fclose(fp);
     if (line) free(line);
 
