@@ -21,7 +21,7 @@ var index = 1, round1 = 0, packets = [], left, right;
 while ((left = inputLines.next()) && (right = inputLines.next()) && (index++)) {
     left = JSON.parse(left), right = JSON.parse(right);
     if (comparePackets(left, right) < 0)
-        round1 += index;
+        round1 += index - 1;
     packets.push(left, right);
     inputLines.next();
 }
