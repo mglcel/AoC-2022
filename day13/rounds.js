@@ -27,9 +27,9 @@ while ((left = inputLines.next()) && (right = inputLines.next()) && (index++)) {
 }
 console.log("Round 1: " + round1);
 
-var dividers = ["[[2]]", "[[6]]"];
+const dividers = ["[[2]]", "[[6]]"];
 dividers.map(p => packets.push(JSON.parse(p)));
-var decoderKey = packets.sort((p1, p2) => comparePackets(p1, p2))
+const decoderKey = packets.sort((p1, p2) => comparePackets(p1, p2))
                         .map((p, i) => [p, i])
                         .filter((packet) => dividers.includes(JSON.stringify(packet[0])))
                         .map((p) => p[1] + 1)
